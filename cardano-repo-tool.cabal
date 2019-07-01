@@ -25,9 +25,11 @@ library
   other-modules:       RepoTool.Cabal
                        RepoTool.Git
                        RepoTool.Stack
+                       RepoTool.Text
                        RepoTool.Types
 
   build-depends:       base >= 4.10                 && < 5
+                     , filepath
                      , process
                      , text
 

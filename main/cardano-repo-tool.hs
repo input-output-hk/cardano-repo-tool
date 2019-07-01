@@ -48,7 +48,7 @@ pCommand =
        $ Opt.progDesc "Print the git hashes for the relevant repos."
        )
     <> Opt.command "update-hashes"
-       ( Opt.info (pure CmdUpdateGitRepos)
+       ( Opt.info (pure CmdUpdateGitHashes)
        $ Opt.progDesc "Get the latest git hashes, and update all stack.yaml and cabal.project files."
        )
     <> Opt.command "update-repos"

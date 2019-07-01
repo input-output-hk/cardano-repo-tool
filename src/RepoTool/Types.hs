@@ -4,6 +4,7 @@
 module RepoTool.Types
   ( GitHash (..)
   , RepoDirectory (..)
+  , TextPart (..)
   ) where
 
 import           Data.Text (Text)
@@ -14,4 +15,10 @@ newtype GitHash
 
 newtype RepoDirectory
   = RepoDirectory { unRepoDirectory :: FilePath }
+  deriving (Eq, Show)
+
+data TextPart
+  = TextWhitespace !Text
+  | TextReadable !Text
+  | TextGitHash !Text
   deriving (Eq, Show)
