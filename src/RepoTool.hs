@@ -3,3 +3,4 @@ module RepoTool
   ) where
 
 import RepoTool.Git as X
+import RepoTool.Types as X

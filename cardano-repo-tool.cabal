@@ -22,7 +22,10 @@ library
   ghc-options:         -Wall -fwarn-tabs
 
   exposed-modules:     RepoTool
-  other-modules:       RepoTool.Git
+  other-modules:       RepoTool.Cabal
+                       RepoTool.Git
+                       RepoTool.Stack
+                       RepoTool.Types
 
   build-depends:       base >= 4.10                 && < 5
                      , process

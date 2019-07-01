@@ -2,13 +2,12 @@
 
 import           Data.Monoid ((<>))
 
-import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 
 import           Options.Applicative (Parser, ParserInfo, ParserPrefs)
 import qualified Options.Applicative as Opt
 
-import           RepoTool (GitHash (..), RepoDirectory (..), getGitHash, updateGitRepo)
+import           RepoTool (RepoDirectory (..), renderRepoHash, updateGitHashes, updateGitRepo)
 
 
 main :: IO ()
@@ -28,6 +27,7 @@ main =
 
 data Command
   = CmdPrintGitHashes
+  | CmdUpdateGitHashes
   | CmdUpdateGitRepos
 
 -- -----------------------------------------------------------------------------
@@ -44,9 +44,17 @@ pCommand :: Parser Command
 pCommand =
   Opt.subparser
     ( Opt.command "print-hashes"
-         (Opt.info (pure CmdPrintGitHashes) $ Opt.progDesc "Print the git hashes for the relevant repos.")
+       ( Opt.info (pure CmdPrintGitHashes)
+       $ Opt.progDesc "Print the git hashes for the relevant repos."
+       )
+    <> Opt.command "update-hashes"
+       ( Opt.info (pure CmdUpdateGitRepos)
+       $ Opt.progDesc "Get the latest git hashes, and update all stack.yaml and cabal.project files."
+       )
     <> Opt.command "update-repos"
-         (Opt.info (pure CmdUpdateGitRepos) $ Opt.progDesc "Run 'git checkout master && git pull --rebase' on all repos.")
+       ( Opt.info (pure CmdUpdateGitRepos)
+       $ Opt.progDesc "Run 'git checkout master && git pull --rebase' on all repos."
+       )
     )
 
 -- -----------------------------------------------------------------------------
@@ -54,18 +62,11 @@ pCommand =
 runRepoTool :: Command -> IO ()
 runRepoTool cmd =
   case cmd of
-    CmdPrintGitHashes -> mapM_ printGitHashes repos
+    CmdPrintGitHashes -> mapM_ (\ r -> Text.putStrLn =<< renderRepoHash r) repos
+    CmdUpdateGitHashes -> updateGitHashes repos
     CmdUpdateGitRepos -> mapM_ updateGitRepo repos
 
-
-printGitHashes :: RepoDirectory -> IO ()
-printGitHashes (RepoDirectory repo) = do
-  gh <- getGitHash (RepoDirectory repo)
-  Text.putStrLn $ mconcat
-    [ Text.pack repo
-    , Text.replicate (30 - length repo) " "
-    , unGitHash gh
-    ]
+-- -----------------------------------------------------------------------------
 
 repos :: [RepoDirectory]
 repos =
