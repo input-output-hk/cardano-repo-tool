@@ -22,9 +22,11 @@ library
   ghc-options:         -Wall -fwarn-tabs
 
   exposed-modules:     RepoTool
-  -- other-modules:
+  other-modules:       RepoTool.Git
 
   build-depends:       base >= 4.10                 && < 5
+                     , directory
+                     , process
                      , text
 
 executable cardano-repo-tool
@@ -35,3 +37,4 @@ executable cardano-repo-tool
 
   build-depends:       base >= 4.10                 && < 5
                      , cardano-repo-tool
+                     , text

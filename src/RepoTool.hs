@@ -1,4 +1,5 @@
-module RepoTool (someFunc) where
+module RepoTool
+  ( module X
+  ) where
 
-someFunc :: IO ()
-someFunc = putStrLn "someFunc"
+import RepoTool.Git as X
