@@ -1,38 +1,84 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+import           Data.Monoid ((<>))
+
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 
-import           RepoTool (GitHash (..), getGitHash)
+import           Options.Applicative (Parser, ParserInfo, ParserPrefs)
+import qualified Options.Applicative as Opt
+
+import           RepoTool (GitHash (..), RepoDirectory (..), getGitHash, updateGitRepo)
 
 
 main :: IO ()
 main =
-  mapM_ printGitHashes repos
+  Opt.customExecParser p opts >>= runRepoTool
+  where
+    opts :: ParserInfo Command
+    opts = Opt.info (Opt.helper <*> pVersion <*> pCommand)
+      ( Opt.fullDesc
+      <> Opt.header "cardano-repo-tool - A tool for managing the Cardano repos."
+      )
+
+    p :: ParserPrefs
+    p = Opt.prefs Opt.showHelpOnEmpty
+
+-- -----------------------------------------------------------------------------
+
+data Command
+  = CmdPrintGitHashes
+  | CmdUpdateGitRepos
+
+-- -----------------------------------------------------------------------------
+
+pVersion :: Parser (a -> a)
+pVersion =
+  Opt.infoOption "cabal-repo-tool version 0.1.0.0"
+    (  Opt.long "version"
+    <> Opt.short 'v'
+    <> Opt.help "Print the version and exit"
+    )
+
+pCommand :: Parser Command
+pCommand =
+  Opt.subparser
+    ( Opt.command "print-hashes"
+         (Opt.info (pure CmdPrintGitHashes) $ Opt.progDesc "Print the git hashes for the relevant repos.")
+    <> Opt.command "update-repos"
+         (Opt.info (pure CmdUpdateGitRepos) $ Opt.progDesc "Run 'git checkout master && git pull --rebase' on all repos.")
+    )
+
+-- -----------------------------------------------------------------------------
+
+runRepoTool :: Command -> IO ()
+runRepoTool cmd =
+  case cmd of
+    CmdPrintGitHashes -> mapM_ printGitHashes repos
+    CmdUpdateGitRepos -> mapM_ updateGitRepo repos
 
 
-
-printGitHashes :: FilePath -> IO ()
-printGitHashes repo = do
-  gh <- getGitHash repo
+printGitHashes :: RepoDirectory -> IO ()
+printGitHashes (RepoDirectory repo) = do
+  gh <- getGitHash (RepoDirectory repo)
   Text.putStrLn $ mconcat
     [ Text.pack repo
     , Text.replicate (30 - length repo) " "
     , unGitHash gh
     ]
 
-
-repos :: [FilePath]
+repos :: [RepoDirectory]
 repos =
-  [ "cardano-base"
-  , "cardano-crypto"
-  , "cardano-ledger"
-  , "cardano-ledger-specs"
-  , "cardano-node"
-  , "cardano-prelude"
-  , "cardano-shell"
-  , "cardano-sl-x509"
-  , "iohk-monitoring-framework"
-  , "ouroboros-network"
-  ]
+  map RepoDirectory
+    [ "cardano-base"
+    , "cardano-crypto"
+    , "cardano-ledger"
+    , "cardano-ledger-specs"
+    , "cardano-node"
+    , "cardano-prelude"
+    , "cardano-shell"
+    , "cardano-sl-x509"
+    , "iohk-monitoring-framework"
+    , "ouroboros-network"
+    ]
 

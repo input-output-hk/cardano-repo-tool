@@ -37,4 +37,5 @@ executable cardano-repo-tool
 
   build-depends:       base >= 4.10                 && < 5
                      , cardano-repo-tool
+                     , optparse-applicative
                      , text
