@@ -28,9 +28,24 @@ library
                        RepoTool.Text
                        RepoTool.Types
 
-  build-depends:       base >= 4.10                 && < 5
+  build-depends:       base                             >= 4.10             && < 5
                      , filepath
                      , process
+                     , text
+
+test-suite test
+  default-language:   Haskell2010
+  ghc-options:        -Wall -fwarn-tabs -threaded -O2
+  type:               exitcode-stdio-1.0
+
+  main-is:            test.hs
+  hs-source-dirs:     test
+
+  other-modules:      Test.RepoTool.Text
+
+  build-depends:       base
+                     , cardano-repo-tool
+                     , hedgehog                         == 1.0.*
                      , text
 
 executable cardano-repo-tool
@@ -39,7 +54,7 @@ executable cardano-repo-tool
   main-is:             cardano-repo-tool.hs
   ghc-options:         -Wall -fwarn-tabs
 
-  build-depends:       base >= 4.10                 && < 5
+  build-depends:       base
                      , cardano-repo-tool
                      , optparse-applicative
                      , text
