@@ -27,6 +27,7 @@ main =
 
 data Command
   = CmdPrintGitHashes
+  | CmdListRepos
   | CmdUpdateGitHashes
   | CmdUpdateGitRepos
 
@@ -47,6 +48,10 @@ pCommand =
        ( Opt.info (pure CmdPrintGitHashes)
        $ Opt.progDesc "Print the git hashes for the relevant repos."
        )
+    <> Opt.command "list-repos"
+       ( Opt.info (pure CmdListRepos)
+       $ Opt.progDesc "List the repos expected by this tool."
+       )
     <> Opt.command "update-hashes"
        ( Opt.info (pure CmdUpdateGitHashes)
        $ Opt.progDesc "Get the latest git hashes, and update all stack.yaml and cabal.project files."
@@ -63,8 +68,15 @@ runRepoTool :: Command -> IO ()
 runRepoTool cmd =
   case cmd of
     CmdPrintGitHashes -> mapM_ (\ r -> Text.putStrLn =<< renderRepoHash r) repos
+    CmdListRepos -> listRepos
     CmdUpdateGitHashes -> updateGitHashes repos
     CmdUpdateGitRepos -> mapM_ updateGitRepo repos
+
+listRepos :: IO ()
+listRepos = do
+  putStrLn "Expect the following repos:\n"
+  mapM_ (\ r -> putStrLn $ "  " ++ unRepoDirectory r) repos
+  putStrLn ""
 
 -- -----------------------------------------------------------------------------
 
