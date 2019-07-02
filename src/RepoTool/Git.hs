@@ -4,6 +4,7 @@
 module RepoTool.Git
   ( getGitHash
   , getRepoInfo
+  , gitCloneRepo
   , renderRepoHash
   , updateGitHashes
   , updateGitRepo
@@ -44,6 +45,10 @@ getRepoUrl (RepoDirectory fpath) = do
     [] -> error $ "getGitUrl: No url found for repo '" ++ fpath ++ "'"
     (TextGitRepo x:_) -> pure $ RepoUrl x
     _ -> error $ "getGitUrl: impossible"
+
+gitCloneRepo :: RepoDirectory -> IO ()
+gitCloneRepo (RepoDirectory fpath) =
+  callProcess gitBinary [ "clone", "https://github.com/input-output-hk/" ++ fpath ]
 
 renderRepoHash :: RepoDirectory -> IO Text
 renderRepoHash rd@(RepoDirectory repo) = do

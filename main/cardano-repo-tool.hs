@@ -1,5 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+import           Control.Monad (unless)
+
 import           Data.Monoid ((<>))
 
 import qualified Data.Text.IO as Text
@@ -7,7 +9,11 @@ import qualified Data.Text.IO as Text
 import           Options.Applicative (Parser, ParserInfo, ParserPrefs)
 import qualified Options.Applicative as Opt
 
-import           RepoTool (RepoDirectory (..), renderRepoHash, updateGitHashes, updateGitRepo)
+import           RepoTool (RepoDirectory (..), gitCloneRepo, renderRepoHash, updateGitHashes, updateGitRepo)
+
+import           System.Directory (doesDirectoryExist)
+import           System.Environment (getProgName)
+import           System.Exit (exitFailure)
 
 
 main :: IO ()
@@ -26,7 +32,8 @@ main =
 -- -----------------------------------------------------------------------------
 
 data Command
-  = CmdPrintGitHashes
+  = CmdCloneRepos
+  | CmdPrintGitHashes
   | CmdListRepos
   | CmdUpdateGitHashes
   | CmdUpdateGitRepos
@@ -44,7 +51,11 @@ pVersion =
 pCommand :: Parser Command
 pCommand =
   Opt.subparser
-    ( Opt.command "print-hashes"
+    ( Opt.command "clone-repos"
+       ( Opt.info (pure CmdCloneRepos)
+       $ Opt.progDesc "Clone any missing repos into the current directory."
+       )
+    <> Opt.command "print-hashes"
        ( Opt.info (pure CmdPrintGitHashes)
        $ Opt.progDesc "Print the git hashes for the relevant repos."
        )
@@ -67,16 +78,46 @@ pCommand =
 runRepoTool :: Command -> IO ()
 runRepoTool cmd =
   case cmd of
-    CmdPrintGitHashes -> mapM_ (\ r -> Text.putStrLn =<< renderRepoHash r) repos
+    CmdCloneRepos -> cloneRepos
+    CmdPrintGitHashes -> validateRepos >> mapM_ (\ r -> Text.putStrLn =<< renderRepoHash r) repos
     CmdListRepos -> listRepos
-    CmdUpdateGitHashes -> updateGitHashes repos
-    CmdUpdateGitRepos -> mapM_ updateGitRepo repos
+    CmdUpdateGitHashes -> validateRepos >> updateGitHashes repos
+    CmdUpdateGitRepos -> validateRepos >> mapM_ updateGitRepo repos
+
+cloneRepos :: IO ()
+cloneRepos =
+  mapM_ cloneIfNeeded repos
+ where
+  cloneIfNeeded rd@(RepoDirectory fpath) = do
+    e <- doesDirectoryExist fpath
+    unless e $
+      gitCloneRepo rd
 
 listRepos :: IO ()
 listRepos = do
   putStrLn "Expect the following repos:\n"
   mapM_ (\ r -> putStrLn $ "  " ++ unRepoDirectory r) repos
   putStrLn ""
+
+validateRepos :: IO ()
+validateRepos = do
+  mapM_ exists repos
+ where
+  exists (RepoDirectory fpath) = do
+    e <- doesDirectoryExist fpath
+    unless e $ do
+      progName <- getProgName
+      mapM_ putStrLn $
+        [ "Error:"
+        , "  Git repository " ++ fpath ++ " does not exit in the current directory."
+        , "  It should be possible to clone it using the command:"
+        , "    git clone https://github.com/input-output-hk/"
+        , "  Alternatively, you could just run:"
+        , "    " ++ progName ++ " clone"
+        , "  which would clone repos as needed."
+        , ""
+        ]
+      exitFailure
 
 -- -----------------------------------------------------------------------------
 
