@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-module RepoTool.Cabal
-  ( updateCabalProject
+module RepoTool.UpdateHash
+  ( updateHashes
   ) where
 
 import           Control.Exception (IOException)
@@ -17,21 +17,17 @@ import           RepoTool.Types
 import           System.FilePath ((</>))
 
 
-updateCabalProject :: RepoDirectory -> RepoInfoMap -> IO ()
-updateCabalProject (RepoDirectory fpath) rmap = do
-  let cabalProject = fpath </> "cabal.project"
-  result <- Expection.try $ Text.readFile cabalProject
+updateHashes :: RepoDirectory -> ConfigType -> RepoInfoMap -> IO ()
+updateHashes rd cfgType rmap = do
+  let configFile = getConfigFile rd cfgType
+  result <- Expection.try $ Text.readFile configFile
   case result of
     Left (_ :: IOException) -> pure ()   -- File didn't exist. Nothing to do.
     Right before -> do
-      let after = concatParts $ updateHashes rmap (splitIntoParts before)
+      let after = concatParts . snd $ List.mapAccumL func Nothing (splitIntoParts before)
       when (after /= before) $ do
-        putStrLn $ "Updated " ++ cabalProject
-        Text.writeFile cabalProject after
-
-updateHashes :: RepoInfoMap -> [TextPart] -> [TextPart]
-updateHashes rmap =
-  snd . List.mapAccumL func Nothing
+        putStrLn $ "Updated " ++ configFile
+        Text.writeFile configFile after
  where
   func :: Maybe RepoInfo -> TextPart -> (Maybe RepoInfo, TextPart)
   func mrepo tp =
@@ -40,3 +36,11 @@ updateHashes rmap =
       TextReadable _ -> (mrepo, tp)
       TextGitRepo txt -> (Map.lookup (gitNameFromUrl $ RepoUrl txt) rmap, tp)
       TextGitHash _ -> (Nothing, maybe tp (TextGitHash . unGitHash . riHash) mrepo)
+
+getConfigFile :: RepoDirectory -> ConfigType -> FilePath
+getConfigFile (RepoDirectory fpath) cfgFile =
+  case cfgFile of
+    ConfigCabalProject -> fpath </> "cabal.project"
+    ConfigStackYaml -> fpath </> "stack.yaml"
+
+

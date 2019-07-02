@@ -2,7 +2,8 @@
 {-# LANGUAGE TupleSections #-}
 
 module RepoTool.Types
-  ( GitHash (..)
+  ( ConfigType (..)
+  , GitHash (..)
   , RepoDirectory (..)
   , RepoInfo (..)
   , RepoInfoMap
@@ -20,6 +21,11 @@ import qualified Data.List as List
 
 import           Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
+
+data ConfigType
+  = ConfigCabalProject
+  | ConfigStackYaml
+  deriving (Eq, Show)
 
 newtype GitHash
   = GitHash { unGitHash :: Text }

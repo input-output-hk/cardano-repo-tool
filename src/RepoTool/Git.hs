@@ -15,10 +15,9 @@ import           Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 
-import           RepoTool.Cabal
-import           RepoTool.Stack
 import           RepoTool.Types
 import           RepoTool.Text
+import           RepoTool.UpdateHash
 
 import           System.FilePath ((</>))
 import           System.Process (callProcess, readProcess)
@@ -66,8 +65,8 @@ updateGitHashes repos = do
  where
   updateRepo :: RepoInfoMap -> RepoDirectory -> IO ()
   updateRepo rmap rd = do
-    updateStackYaml rd rmap
-    updateCabalProject rd rmap
+    updateHashes rd ConfigCabalProject rmap
+    updateHashes rd ConfigStackYaml rmap
 
 updateGitRepo :: RepoDirectory -> IO ()
 updateGitRepo (RepoDirectory fpath) = do

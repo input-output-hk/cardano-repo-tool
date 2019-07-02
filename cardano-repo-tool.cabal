@@ -27,11 +27,10 @@ library
   ghc-options:         -Wall -fwarn-tabs
 
   exposed-modules:     RepoTool
-  other-modules:       RepoTool.Cabal
-                       RepoTool.Git
-                       RepoTool.Stack
+  other-modules:       RepoTool.Git
                        RepoTool.Text
                        RepoTool.Types
+                       RepoTool.UpdateHash
 
   build-depends:       base                             >= 4.10             && < 5
                      , containers
