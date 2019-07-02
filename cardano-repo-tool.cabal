@@ -29,6 +29,7 @@ library
                        RepoTool.Types
 
   build-depends:       base                             >= 4.10             && < 5
+                     , containers
                      , filepath
                      , process
                      , text

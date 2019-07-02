@@ -3,7 +3,7 @@
 
 module RepoTool.Git
   ( getGitHash
-  , getRepoHashPair
+  , getRepoInfo
   , renderRepoHash
   , updateGitHashes
   , updateGitRepo
@@ -12,11 +12,14 @@ module RepoTool.Git
 import           Data.Char (isHexDigit)
 import           Data.Text (Text)
 import qualified Data.Text as Text
+import qualified Data.Text.IO as Text
 
 import           RepoTool.Cabal
 import           RepoTool.Stack
 import           RepoTool.Types
+import           RepoTool.Text
 
+import           System.FilePath ((</>))
 import           System.Process (callProcess, readProcess)
 
 
@@ -28,9 +31,19 @@ getGitHash (RepoDirectory fpath) = do
     then pure $ GitHash (Text.pack hash)
     else error $ "getGitHash: Failed for " ++ fpath
 
-getRepoHashPair :: RepoDirectory -> IO (RepoDirectory, GitHash)
-getRepoHashPair rd =
-  (rd,) <$> getGitHash rd
+getRepoInfo :: RepoDirectory -> IO RepoInfo
+getRepoInfo rd = do
+  gh <- getGitHash rd
+  url <- getRepoUrl rd
+  pure $ RepoInfo rd gh (gitNameFromUrl url) url
+
+getRepoUrl :: RepoDirectory -> IO RepoUrl
+getRepoUrl (RepoDirectory fpath) = do
+  parts <- splitIntoParts <$> Text.readFile (fpath </> ".git" </> "config")
+  case [ p | p@(TextGitRepo _) <- parts] of
+    [] -> error $ "getGitUrl: No url found for repo '" ++ fpath ++ "'"
+    (TextGitRepo x:_) -> pure $ RepoUrl x
+    _ -> error $ "getGitUrl: impossible"
 
 renderRepoHash :: RepoDirectory -> IO Text
 renderRepoHash rd@(RepoDirectory repo) = do
@@ -43,13 +56,13 @@ renderRepoHash rd@(RepoDirectory repo) = do
 
 updateGitHashes :: [RepoDirectory] -> IO ()
 updateGitHashes repos = do
-  pairs <- mapM getRepoHashPair repos
-  mapM_ (\ (r, _) -> updateRepo r pairs) pairs
+  rmap <- repoMapify <$> mapM getRepoInfo repos
+  mapM_ (updateRepo rmap) repos
  where
-  updateRepo :: RepoDirectory -> [(RepoDirectory, GitHash)] -> IO ()
-  updateRepo rd pairs = do
-    updateStackYaml rd pairs
-    updateCabalProject rd pairs
+  updateRepo :: RepoInfoMap -> RepoDirectory -> IO ()
+  updateRepo rmap rd = do
+    updateStackYaml rd rmap
+    updateCabalProject rd rmap
 
 updateGitRepo :: RepoDirectory -> IO ()
 updateGitRepo (RepoDirectory fpath) = do
