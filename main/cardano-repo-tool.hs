@@ -9,7 +9,7 @@ import qualified Data.Text.IO as Text
 import           Options.Applicative (Parser, ParserInfo, ParserPrefs)
 import qualified Options.Applicative as Opt
 
-import           RepoTool (RepoDirectory (..), gitCloneRepo, renderRepoHash, updateGitHashes, updateGitRepo)
+import           RepoTool (RepoDirectory (..), gitCloneRepo, renderRepoHash, updateAllRepoGitHashes, updateGitRepo, updateRepoGitHash)
 
 import           System.Directory (doesDirectoryExist)
 import           System.Environment (getProgName)
@@ -35,6 +35,7 @@ data Command
   = CmdCloneRepos
   | CmdPrintGitHashes
   | CmdListRepos
+  | CmdUpdateGitHash RepoDirectory
   | CmdUpdateGitHashes
   | CmdUpdateGitRepos
 
@@ -63,6 +64,10 @@ pCommand =
        ( Opt.info (pure CmdListRepos)
        $ Opt.progDesc "List the repos expected by this tool."
        )
+    <> Opt.command "update-hash"
+       ( Opt.info (CmdUpdateGitHash <$> pRepoDirectory)
+       $ Opt.progDesc "Get the latest git hashes, and update the stack.yaml and cabal.project file for the specified repo."
+       )
     <> Opt.command "update-hashes"
        ( Opt.info (pure CmdUpdateGitHashes)
        $ Opt.progDesc "Get the latest git hashes, and update all stack.yaml and cabal.project files."
@@ -73,6 +78,15 @@ pCommand =
        )
     )
 
+pRepoDirectory :: Parser RepoDirectory
+pRepoDirectory =
+  RepoDirectory <$>
+    Opt.strOption
+      (  Opt.long "repo"
+      <> Opt.short 'r'
+      <> Opt.help "A specific repo."
+      )
+
 -- -----------------------------------------------------------------------------
 
 runRepoTool :: Command -> IO ()
@@ -81,7 +95,8 @@ runRepoTool cmd =
     CmdCloneRepos -> cloneRepos
     CmdPrintGitHashes -> validateRepos >> mapM_ (\ r -> Text.putStrLn =<< renderRepoHash r) repos
     CmdListRepos -> listRepos
-    CmdUpdateGitHashes -> validateRepos >> updateGitHashes repos
+    CmdUpdateGitHash repo -> validateRepos >> updateRepoGitHash repos repo
+    CmdUpdateGitHashes -> validateRepos >> updateAllRepoGitHashes repos
     CmdUpdateGitRepos -> validateRepos >> mapM_ updateGitRepo repos
 
 cloneRepos :: IO ()

@@ -6,7 +6,8 @@ module RepoTool.Git
   , getRepoInfo
   , gitCloneRepo
   , renderRepoHash
-  , updateGitHashes
+  , updateRepoGitHash
+  , updateAllRepoGitHashes
   , updateGitRepo
   ) where
 
@@ -58,13 +59,18 @@ renderRepoHash rd@(RepoDirectory repo) = do
     , unGitHash gh
     ]
 
-updateGitHashes :: [RepoDirectory] -> IO ()
-updateGitHashes repos = do
+updateRepoGitHash :: [RepoDirectory] -> RepoDirectory -> IO ()
+updateRepoGitHash repos repo = do
   rmap <- repoMapify <$> mapM getRepoInfo repos
-  mapM_ (updateRepo rmap) repos
- where
-  updateRepo :: RepoInfoMap -> RepoDirectory -> IO ()
-  updateRepo rmap rd = do
+  updateRepoGitHashes rmap repo
+
+updateAllRepoGitHashes :: [RepoDirectory] -> IO ()
+updateAllRepoGitHashes repos = do
+  rmap <- repoMapify <$> mapM getRepoInfo repos
+  mapM_ (updateRepoGitHashes rmap) repos
+
+updateRepoGitHashes :: RepoInfoMap -> RepoDirectory -> IO ()
+updateRepoGitHashes rmap rd = do
     updateHashes rd ConfigCabalProject rmap
     updateHashes rd ConfigStackYaml rmap
 
