@@ -51,11 +51,10 @@ updateUrlHash rmap txt = do
     else do
       case filter (`elem` repoNames) parts of
         [] -> TextGitRepo txt
-        [name] ->
+        (name:_) ->
           case Map.lookup (RepoName name) rmap of
             Nothing -> TextGitRepo txt
             Just ri -> TextGitRepo $ Text.intercalate "/" (map (replaceHash ri) parts)
-        _ -> error "updateUrlHash: Can this even happen?"
 
  where
    replaceHash :: RepoInfo -> Text -> Text
