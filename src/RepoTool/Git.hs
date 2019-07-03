@@ -17,6 +17,7 @@ import           Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 
+import           RepoTool.Git.Status
 import           RepoTool.Types
 import           RepoTool.Text
 import           RepoTool.UpdateHash
@@ -45,19 +46,15 @@ getRepoUrl (RepoDirectory fpath) = do
   case [ p | p@(TextGitRepo _) <- parts] of
     [] -> error $ "getGitUrl: No url found for repo '" ++ fpath ++ "'"
     (TextGitRepo x:_) -> pure $ RepoUrl x
-    _ -> error $ "getGitUrl: impossible"
+    _ -> error $ "getRepoUrl: impossible"
 
 gitCloneRepo :: RepoDirectory -> IO ()
 gitCloneRepo (RepoDirectory fpath) =
   callProcess gitBinary [ "clone", "https://github.com/input-output-hk/" ++ fpath ]
 
 gitRepoStatuses :: [RepoDirectory] -> IO ()
-gitRepoStatuses repos = do
-  mapM_ repoStatus repos
- where
-  repoStatus :: RepoDirectory -> IO ()
-  repoStatus (RepoDirectory fpath) = do
-    callProcess gitBinary [ "-C", fpath, "status" ]
+gitRepoStatuses =
+  mapM_ gitRepoStatus
 
 renderRepoHash :: RepoDirectory -> IO Text
 renderRepoHash rd@(RepoDirectory repo) = do
@@ -87,6 +84,3 @@ updateGitRepo :: RepoDirectory -> IO ()
 updateGitRepo (RepoDirectory fpath) = do
   callProcess gitBinary [ "-C", fpath, "checkout", "master" ]
   callProcess gitBinary [ "-C", fpath, "pull", "--rebase" ]
-
-gitBinary :: String
-gitBinary = "/usr/bin/git"
