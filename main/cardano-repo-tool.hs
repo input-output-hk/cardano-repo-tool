@@ -9,7 +9,8 @@ import qualified Data.Text.IO as Text
 import           Options.Applicative (Parser, ParserInfo, ParserPrefs)
 import qualified Options.Applicative as Opt
 
-import           RepoTool (RepoDirectory (..), gitCloneRepo, renderRepoHash, updateAllRepoGitHashes, updateGitRepo, updateRepoGitHash)
+import           RepoTool (RepoDirectory (..), gitCloneRepo, gitRepoStatuses, renderRepoHash,
+                    updateAllRepoGitHashes, updateGitRepo, updateRepoGitHash)
 
 import           System.Directory (doesDirectoryExist)
 import           System.Environment (getProgName)
@@ -35,6 +36,7 @@ data Command
   = CmdCloneRepos
   | CmdPrintGitHashes
   | CmdListRepos
+  | CmdRepoStatus
   | CmdUpdateGitHash RepoDirectory
   | CmdUpdateGitHashes
   | CmdUpdateGitRepos
@@ -63,6 +65,10 @@ pCommand =
     <> Opt.command "list-repos"
        ( Opt.info (pure CmdListRepos)
        $ Opt.progDesc "List the repos expected by this tool."
+       )
+    <> Opt.command "repo-status"
+       ( Opt.info (pure CmdRepoStatus)
+       $ Opt.progDesc "List the statuses of each repo."
        )
     <> Opt.command "update-hash"
        ( Opt.info (CmdUpdateGitHash <$> pRepoDirectory)
@@ -95,6 +101,7 @@ runRepoTool cmd =
     CmdCloneRepos -> cloneRepos
     CmdPrintGitHashes -> validateRepos >> mapM_ (\ r -> Text.putStrLn =<< renderRepoHash r) repos
     CmdListRepos -> listRepos
+    CmdRepoStatus -> gitRepoStatuses repos
     CmdUpdateGitHash repo -> validateRepos >> updateRepoGitHash repos repo
     CmdUpdateGitHashes -> validateRepos >> updateAllRepoGitHashes repos
     CmdUpdateGitRepos -> validateRepos >> mapM_ updateGitRepo repos

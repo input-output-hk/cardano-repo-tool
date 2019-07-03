@@ -5,6 +5,7 @@ module RepoTool.Git
   ( getGitHash
   , getRepoInfo
   , gitCloneRepo
+  , gitRepoStatuses
   , renderRepoHash
   , updateRepoGitHash
   , updateAllRepoGitHashes
@@ -49,6 +50,14 @@ getRepoUrl (RepoDirectory fpath) = do
 gitCloneRepo :: RepoDirectory -> IO ()
 gitCloneRepo (RepoDirectory fpath) =
   callProcess gitBinary [ "clone", "https://github.com/input-output-hk/" ++ fpath ]
+
+gitRepoStatuses :: [RepoDirectory] -> IO ()
+gitRepoStatuses repos = do
+  mapM_ repoStatus repos
+ where
+  repoStatus :: RepoDirectory -> IO ()
+  repoStatus (RepoDirectory fpath) = do
+    callProcess gitBinary [ "-C", fpath, "status" ]
 
 renderRepoHash :: RepoDirectory -> IO Text
 renderRepoHash rd@(RepoDirectory repo) = do
