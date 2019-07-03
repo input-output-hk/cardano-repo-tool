@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 module RepoTool.UpdateHash
   ( updateHashes
@@ -9,6 +10,8 @@ import           Control.Monad (when)
 
 import qualified Data.List as List
 import qualified Data.Map.Strict as Map
+import           Data.Text (Text)
+import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 
 import           RepoTool.Text
@@ -34,8 +37,32 @@ updateHashes rd cfgType rmap = do
     case tp of
       TextWhitespace _ -> (mrepo, tp)
       TextReadable _ -> (mrepo, tp)
-      TextGitRepo txt -> (Map.lookup (gitNameFromUrl $ RepoUrl txt) rmap, tp)
+      TextGitRepo txt -> (Map.lookup (gitNameFromUrl $ RepoUrl txt) rmap, updateUrlHash rmap txt)
       TextGitHash _ -> (Nothing, maybe tp (TextGitHash . unGitHash . riHash) mrepo)
+
+
+updateUrlHash :: RepoInfoMap -> Text -> TextPart
+updateUrlHash rmap txt = do
+  let repoNames = map unRepoName $ Map.keys rmap
+      parts = Text.splitOn "/" txt
+      hasHash = any isGitHash parts
+  if not hasHash
+    then TextGitRepo txt
+    else do
+      case filter (`elem` repoNames) parts of
+        [] -> TextGitRepo txt
+        [name] ->
+          case Map.lookup (RepoName name) rmap of
+            Nothing -> TextGitRepo txt
+            Just ri -> TextGitRepo $ Text.intercalate "/" (map (replaceHash ri) parts)
+        _ -> error "updateUrlHash: Can this even happen?"
+
+ where
+   replaceHash :: RepoInfo -> Text -> Text
+   replaceHash ri tp =
+     if isGitHash tp
+       then unGitHash $ riHash ri
+       else tp
 
 getConfigFile :: RepoDirectory -> ConfigType -> FilePath
 getConfigFile (RepoDirectory fpath) cfgFile =

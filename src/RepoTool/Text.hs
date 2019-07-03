@@ -2,6 +2,7 @@
 module RepoTool.Text
   ( concatParts
   , gitRepoName
+  , isGitHash
   , splitIntoParts
   ) where
 
