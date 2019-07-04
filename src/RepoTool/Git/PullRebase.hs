@@ -1,8 +1,5 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TupleSections #-}
-
-module RepoTool.Git.Status
-  ( gitRepoStatus
+module RepoTool.Git.PullRebase
+  ( gitPullRebase
   ) where
 
 import           Data.List (isPrefixOf)
@@ -13,9 +10,9 @@ import           RepoTool.Types
 import           System.Process (readProcess)
 
 
-gitRepoStatus :: RepoDirectory -> IO ()
-gitRepoStatus (RepoDirectory fpath) = do
-  xs <- filter lineFilter . lines <$> readProcess gitBinary [ "-C", fpath, "status" ] ""
+gitPullRebase :: RepoDirectory -> IO ()
+gitPullRebase (RepoDirectory fpath) = do
+  xs <- filter lineFilter . lines <$> readProcess gitBinary [ "-C", fpath, "pull", "--rebase" ] ""
   if null xs
     then printRepoNameOk fpath
     else do
@@ -25,11 +22,11 @@ gitRepoStatus (RepoDirectory fpath) = do
       mapM_ putStrLn xs
       putStrLn ""
 
-
 lineFilter :: String -> Bool
 lineFilter l
   | null l = False
-  | "On branch master" == l = False
   | "Your branch is up to date" `isPrefixOf` l = False
-  | "nothing to commit" `isPrefixOf` l = False
+  | "Unpacking objects" `isPrefixOf` l = False
+  | "Already up to date" `isPrefixOf` l = False
+  | "Current branch " `isPrefixOf` l = False
   | otherwise = True

@@ -11,7 +11,7 @@ import qualified Options.Applicative as Opt
 
 import           RepoTool (RepoDirectory (..), gitCloneRepo, gitRepoStatuses,
                     gitResetChanges, renderRepoHash,
-                    updateAllRepoGitHashes, updateGitRepo, updateRepoGitHash)
+                    updateAllRepoGitHashes, gitPullRebase, updateRepoGitHash)
 
 import           System.Directory (doesDirectoryExist)
 import           System.Environment (getProgName)
@@ -116,8 +116,8 @@ runRepoTool cmd =
     CmdResetChanges -> validateRepos >> gitResetChanges repos
     CmdUpdateGitHash repo -> validateRepos >> updateRepoGitHash repos repo
     CmdUpdateGitHashes -> validateRepos >> updateAllRepoGitHashes repos
-    CmdUpdateGitRepo repo -> validateRepos >> updateGitRepo repo
-    CmdUpdateGitRepos -> validateRepos >> mapM_ updateGitRepo repos
+    CmdUpdateGitRepo repo -> validateRepos >> gitPullRebase repo
+    CmdUpdateGitRepos -> validateRepos >> mapM_ gitPullRebase repos
 
 cloneRepos :: IO ()
 cloneRepos =

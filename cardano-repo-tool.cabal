@@ -28,6 +28,8 @@ library
 
   exposed-modules:     RepoTool
   other-modules:       RepoTool.Git
+                       RepoTool.Git.Internal
+                       RepoTool.Git.PullRebase
                        RepoTool.Git.Status
                        RepoTool.Text
                        RepoTool.Types

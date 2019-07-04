@@ -5,6 +5,7 @@ module RepoTool.Git
   ( getGitHash
   , getRepoInfo
   , gitCloneRepo
+  , gitPullRebase
   , gitRepoStatuses
   , gitResetChanges
   , renderRepoHash
@@ -13,13 +14,15 @@ module RepoTool.Git
   , updateGitRepo
   ) where
 
-import           Control.Monad (when)
+import           Control.Monad (void, when)
 
 import           Data.Char (isHexDigit)
 import           Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 
+import           RepoTool.Git.Internal
+import           RepoTool.Git.PullRebase
 import           RepoTool.Git.Status
 import           RepoTool.Types
 import           RepoTool.Text
@@ -51,6 +54,10 @@ getRepoUrl (RepoDirectory fpath) = do
     [] -> error $ "getGitUrl: No url found for repo '" ++ fpath ++ "'"
     (TextGitRepo x:_) -> pure $ RepoUrl x
     _ -> error $ "getRepoUrl: impossible"
+
+gitCheckoutMaster :: RepoDirectory -> IO ()
+gitCheckoutMaster (RepoDirectory repo) =
+  void $ readProcess gitBinary ["-C", repo, "checkout", "master"] ""
 
 gitCloneRepo :: RepoDirectory -> IO ()
 gitCloneRepo (RepoDirectory fpath) =
@@ -95,6 +102,6 @@ updateRepoGitHashes rmap rd = do
     updateHashes rd ConfigStackYaml rmap
 
 updateGitRepo :: RepoDirectory -> IO ()
-updateGitRepo (RepoDirectory fpath) = do
-  callProcess gitBinary [ "-C", fpath, "checkout", "master" ]
+updateGitRepo rd@(RepoDirectory fpath) = do
+  gitCheckoutMaster rd
   callProcess gitBinary [ "-C", fpath, "pull", "--rebase" ]
