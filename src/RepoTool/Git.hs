@@ -6,11 +6,14 @@ module RepoTool.Git
   , getRepoInfo
   , gitCloneRepo
   , gitRepoStatuses
+  , gitResetChanges
   , renderRepoHash
   , updateRepoGitHash
   , updateAllRepoGitHashes
   , updateGitRepo
   ) where
+
+import           Control.Monad (when)
 
 import           Data.Char (isHexDigit)
 import           Data.Text (Text)
@@ -22,6 +25,7 @@ import           RepoTool.Types
 import           RepoTool.Text
 import           RepoTool.UpdateHash
 
+import           System.Directory (doesFileExist)
 import           System.FilePath ((</>))
 import           System.Process (callProcess, readProcess)
 
@@ -55,6 +59,16 @@ gitCloneRepo (RepoDirectory fpath) =
 gitRepoStatuses :: [RepoDirectory] -> IO ()
 gitRepoStatuses =
   mapM_ gitRepoStatus
+
+gitResetChanges :: [RepoDirectory] -> IO ()
+gitResetChanges =
+  mapM_ resetChanges
+ where
+  resetChanges (RepoDirectory repo) = do
+    e <- doesFileExist $ repo </> "cabal.project"
+    when e $
+      callProcess gitBinary ["-C", repo, "checkout", "cabal.project"]
+    callProcess gitBinary ["-C", repo, "checkout", "stack.yaml"]
 
 renderRepoHash :: RepoDirectory -> IO Text
 renderRepoHash rd@(RepoDirectory repo) = do

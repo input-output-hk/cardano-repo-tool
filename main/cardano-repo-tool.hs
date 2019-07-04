@@ -9,7 +9,8 @@ import qualified Data.Text.IO as Text
 import           Options.Applicative (Parser, ParserInfo, ParserPrefs)
 import qualified Options.Applicative as Opt
 
-import           RepoTool (RepoDirectory (..), gitCloneRepo, gitRepoStatuses, renderRepoHash,
+import           RepoTool (RepoDirectory (..), gitCloneRepo, gitRepoStatuses,
+                    gitResetChanges, renderRepoHash,
                     updateAllRepoGitHashes, updateGitRepo, updateRepoGitHash)
 
 import           System.Directory (doesDirectoryExist)
@@ -37,6 +38,7 @@ data Command
   | CmdPrintGitHashes
   | CmdListRepos
   | CmdRepoStatus
+  | CmdResetChanges
   | CmdUpdateGitHash RepoDirectory
   | CmdUpdateGitHashes
   | CmdUpdateGitRepos
@@ -70,6 +72,10 @@ pCommand =
        ( Opt.info (pure CmdRepoStatus)
        $ Opt.progDesc "List the statuses of each repo."
        )
+    <> Opt.command "reset-changes"
+       ( Opt.info (pure CmdResetChanges)
+       $ Opt.progDesc "Reset any changes to the cabal.project and stack.yaml files."
+       )
     <> Opt.command "update-hash"
        ( Opt.info (CmdUpdateGitHash <$> pRepoDirectory)
        $ Opt.progDesc "Get the latest git hashes, and update the stack.yaml and cabal.project file for the specified repo."
@@ -101,7 +107,8 @@ runRepoTool cmd =
     CmdCloneRepos -> cloneRepos
     CmdPrintGitHashes -> validateRepos >> mapM_ (\ r -> Text.putStrLn =<< renderRepoHash r) repos
     CmdListRepos -> listRepos
-    CmdRepoStatus -> gitRepoStatuses repos
+    CmdRepoStatus -> validateRepos >> gitRepoStatuses repos
+    CmdResetChanges -> validateRepos >> gitResetChanges repos
     CmdUpdateGitHash repo -> validateRepos >> updateRepoGitHash repos repo
     CmdUpdateGitHashes -> validateRepos >> updateAllRepoGitHashes repos
     CmdUpdateGitRepos -> validateRepos >> mapM_ updateGitRepo repos

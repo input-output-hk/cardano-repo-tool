@@ -36,6 +36,7 @@ library
   build-depends:       base                             >= 4.10             && < 5
                      , ansi-terminal
                      , containers
+                     , directory
                      , filepath
                      , process
                      , text
