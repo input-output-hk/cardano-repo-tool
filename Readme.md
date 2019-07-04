@@ -21,6 +21,11 @@ Available commands:
   clone-repos              Clone any missing repos into the current directory.
   print-hashes             Print the git hashes for the relevant repos.
   list-repos               List the repos expected by this tool.
+  repo-status              List the statuses of each repo.
+  reset-changes            Reset any changes to the cabal.project and stack.yaml
+                           files.
+  update-hash              Get the latest git hashes, and update the stack.yaml
+                           and cabal.project file for the specified repo.
   update-hashes            Get the latest git hashes, and update all stack.yaml
                            and cabal.project files.
   update-repos             Run 'git checkout master && git pull --rebase' on all
