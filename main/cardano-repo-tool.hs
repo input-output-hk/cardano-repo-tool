@@ -148,7 +148,7 @@ validateRepos = do
         , "  It should be possible to clone it using the command:"
         , "    git clone https://github.com/input-output-hk/"
         , "  Alternatively, you could just run:"
-        , "    " ++ progName ++ " clone"
+        , "    " ++ progName ++ " clone-repos"
         , "  which would clone repos as needed."
         , ""
         ]
