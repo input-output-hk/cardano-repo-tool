@@ -28,8 +28,10 @@ Available commands:
                            and cabal.project file for the specified repo.
   update-hashes            Get the latest git hashes, and update all stack.yaml
                            and cabal.project files.
-  update-repos             Run 'git checkout master && git pull --rebase' on all
-                           repos.
+  update-repo              Update a single repo ('git checkout master && git
+                           pull --rebase').
+  update-repos             Update all repos ('git checkout master && git pull
+                           --rebase').
 ```
 
 ## Usage

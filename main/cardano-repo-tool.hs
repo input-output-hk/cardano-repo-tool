@@ -41,6 +41,7 @@ data Command
   | CmdResetChanges
   | CmdUpdateGitHash RepoDirectory
   | CmdUpdateGitHashes
+  | CmdUpdateGitRepo RepoDirectory
   | CmdUpdateGitRepos
 
 -- -----------------------------------------------------------------------------
@@ -84,9 +85,13 @@ pCommand =
        ( Opt.info (pure CmdUpdateGitHashes)
        $ Opt.progDesc "Get the latest git hashes, and update all stack.yaml and cabal.project files."
        )
+    <> Opt.command "update-repo"
+       ( Opt.info (CmdUpdateGitRepo <$> pRepoDirectory)
+       $ Opt.progDesc "Update a single repo ('git checkout master && git pull --rebase')."
+       )
     <> Opt.command "update-repos"
        ( Opt.info (pure CmdUpdateGitRepos)
-       $ Opt.progDesc "Run 'git checkout master && git pull --rebase' on all repos."
+       $ Opt.progDesc "Update all repos ('git checkout master && git pull --rebase')."
        )
     )
 
@@ -111,6 +116,7 @@ runRepoTool cmd =
     CmdResetChanges -> validateRepos >> gitResetChanges repos
     CmdUpdateGitHash repo -> validateRepos >> updateRepoGitHash repos repo
     CmdUpdateGitHashes -> validateRepos >> updateAllRepoGitHashes repos
+    CmdUpdateGitRepo repo -> validateRepos >> updateGitRepo repo
     CmdUpdateGitRepos -> validateRepos >> mapM_ updateGitRepo repos
 
 cloneRepos :: IO ()
