@@ -72,10 +72,12 @@ gitResetChanges =
   mapM_ resetChanges
  where
   resetChanges (RepoDirectory repo) = do
-    e <- doesFileExist $ repo </> "cabal.project"
-    when e $
+    ec <- doesFileExist $ repo </> "cabal.project"
+    when ec $
       callProcess gitBinary ["-C", repo, "checkout", "cabal.project"]
-    callProcess gitBinary ["-C", repo, "checkout", "stack.yaml"]
+    es <- doesFileExist $ repo </> "stack.yaml"
+    when es $
+      callProcess gitBinary ["-C", repo, "checkout", "stack.yaml"]
 
 renderRepoHash :: RepoDirectory -> IO Text
 renderRepoHash rd@(RepoDirectory repo) = do
