@@ -10,12 +10,10 @@ import           Data.List (isPrefixOf)
 import           RepoTool.Git.Internal
 import           RepoTool.Types
 
-import           System.Process (readProcess)
-
 
 gitRepoStatus :: RepoDirectory -> IO ()
 gitRepoStatus (RepoDirectory fpath) = do
-  xs <- filter lineFilter . lines <$> readProcess gitBinary [ "-C", fpath, "status" ] ""
+  xs <- filter lineFilter . lines <$> readProcess gitBinary [ "-C", fpath, "status" ]
   if null xs
     then printRepoNameOk fpath
     else do

@@ -30,13 +30,13 @@ import           RepoTool.UpdateHash
 
 import           System.Directory (doesFileExist)
 import           System.FilePath ((</>))
-import           System.Process (callProcess, readProcess)
+import           System.Process (callProcess)
 
 
 getGitHash :: RepoDirectory -> IO GitHash
 getGitHash (RepoDirectory fpath) = do
   hash <- takeWhile isHexDigit <$>
-            readProcess gitBinary [ "-C", fpath, "rev-parse", "master" ] ""
+            readProcess gitBinary [ "-C", fpath, "rev-parse", "master" ]
   if length hash == 40
     then pure $ GitHash (Text.pack hash)
     else error $ "getGitHash: Failed for " ++ fpath
@@ -57,7 +57,7 @@ getRepoUrl (RepoDirectory fpath) = do
 
 gitCheckoutMaster :: RepoDirectory -> IO ()
 gitCheckoutMaster (RepoDirectory repo) =
-  void $ readProcess gitBinary ["-C", repo, "checkout", "master"] ""
+  void $ readProcess gitBinary ["-C", repo, "checkout", "master"]
 
 gitCloneRepo :: RepoDirectory -> IO ()
 gitCloneRepo (RepoDirectory fpath) =
