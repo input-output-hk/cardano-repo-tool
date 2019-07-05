@@ -160,6 +160,7 @@ repos :: [RepoDirectory]
 repos =
   map RepoDirectory
     [ "cardano-base"
+    , "cardano-byron-proxy"
     , "cardano-crypto"
     , "cardano-ledger"
     , "cardano-ledger-specs"
