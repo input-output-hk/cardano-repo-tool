@@ -19,7 +19,7 @@ gitBinary = "/usr/bin/git"
 
 printRepoName :: String -> IO ()
 printRepoName name = do
-  setSGR [SetColor Foreground Dull Blue]
+  setSGR [SetColor Foreground Dull Yellow]
   putStr name
   setSGR [Reset]
 
