@@ -33,6 +33,7 @@ library
                        RepoTool.Git.Status
                        RepoTool.Text
                        RepoTool.Types
+                       RepoTool.UpdateCabal
                        RepoTool.UpdateHash
 
   build-depends:       base                             >= 4.10             && < 5

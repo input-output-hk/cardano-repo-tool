@@ -2,6 +2,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module RepoTool.UpdateHash
   ( updateHashes
+  , updateUrlHashes
   ) where
 
 import           Control.Exception (IOException)
@@ -27,22 +28,26 @@ updateHashes rd cfgType rmap = do
   case result of
     Left (_ :: IOException) -> pure ()   -- File didn't exist. Nothing to do.
     Right before -> do
-      let after = concatParts . snd $ List.mapAccumL func Nothing (splitIntoParts before)
+      let after = concatParts $ updateUrlHashes rmap (splitIntoParts before)
       when (after /= before) $ do
         putStrLn $ "Updated " ++ configFile
         Text.writeFile configFile after
+
+updateUrlHashes :: RepoInfoMap -> [TextPart] -> [TextPart]
+updateUrlHashes rmap =
+  snd . List.mapAccumL func Nothing
  where
   func :: Maybe RepoInfo -> TextPart -> (Maybe RepoInfo, TextPart)
   func mrepo tp =
     case tp of
       TextWhitespace _ -> (mrepo, tp)
       TextReadable _ -> (mrepo, tp)
-      TextGitRepo txt -> (Map.lookup (gitNameFromUrl $ RepoUrl txt) rmap, updateUrlHash rmap txt)
+      TextGitRepo txt -> (Map.lookup (gitNameFromUrl $ RepoUrl txt) rmap, updateUrlHash rmap (RepoUrl txt))
       TextGitHash _ -> (Nothing, maybe tp (TextGitHash . unGitHash . riHash) mrepo)
 
 
-updateUrlHash :: RepoInfoMap -> Text -> TextPart
-updateUrlHash rmap txt = do
+updateUrlHash :: RepoInfoMap -> RepoUrl -> TextPart
+updateUrlHash rmap (RepoUrl txt) = do
   let repoNames = map unRepoName $ Map.keys rmap
       parts = Text.splitOn "/" txt
       hasHash = any isGitHash parts

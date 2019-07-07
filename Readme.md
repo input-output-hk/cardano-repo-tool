@@ -24,6 +24,8 @@ Available commands:
   repo-status              List the statuses of each repo.
   reset-changes            Reset any changes to the cabal.project and stack.yaml
                            files.
+  update-cabal-project     Update git hashes in cabal.project file (in the
+                           current directory) from the stack.yaml file.
   update-hash              Get the latest git hashes, and update the stack.yaml
                            and cabal.project file for the specified repo.
   update-hashes            Get the latest git hashes, and update all stack.yaml
