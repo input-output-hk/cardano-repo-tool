@@ -1,6 +1,8 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings   #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 import           Control.Monad (unless)
+import           Control.Exception (SomeException, throwIO, catch)
 
 import           Data.Monoid ((<>))
 
@@ -10,8 +12,9 @@ import           Options.Applicative (Parser, ParserInfo, ParserPrefs)
 import qualified Options.Applicative as Opt
 
 import           RepoTool (RepoDirectory (..), gitCloneRepo, gitRepoStatuses,
-                    gitResetChanges, renderRepoHash, updateAllRepoGitHashes,
-                    gitPullRebase, updateCabalFromStack, updateRepoGitHash)
+                    gitResetChanges, printRepoName, renderRepoHash,
+                    updateAllRepoGitHashes, gitPullRebase, updateCabalFromStack,
+                    updateRepoGitHash)
 
 import           System.Directory (doesDirectoryExist)
 import           System.Environment (getProgName)
@@ -123,7 +126,17 @@ runRepoTool cmd =
     CmdUpdateGitHash repo -> validateRepos >> updateRepoGitHash repos repo
     CmdUpdateGitHashes -> validateRepos >> updateAllRepoGitHashes repos
     CmdUpdateGitRepo repo -> validateRepos >> gitPullRebase repo
-    CmdUpdateGitRepos -> validateRepos >> mapM_ gitPullRebase repos
+    CmdUpdateGitRepos ->
+      validateRepos >>
+        mapM_
+          (\repo@(RepoDirectory fpath) ->
+            gitPullRebase repo
+            `catch`
+            (\(e :: SomeException) -> do
+              printRepoName fpath
+              putStr ": "
+              throwIO e))
+          repos
 
 cloneRepos :: IO ()
 cloneRepos =

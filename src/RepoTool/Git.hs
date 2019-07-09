@@ -8,6 +8,7 @@ module RepoTool.Git
   , gitPullRebase
   , gitRepoStatuses
   , gitResetChanges
+  , printRepoName
   , renderRepoHash
   , updateRepoGitHash
   , updateAllRepoGitHashes
