@@ -14,11 +14,9 @@ gitPullRebase (RepoDirectory fpath) = do
   if null xs
     then printRepoNameOk fpath
     else do
-      putStrLn ""
       printRepoName fpath
       putStrLn ":"
       mapM_ (\ s -> putStrLn ("  " ++ s)) xs
-      putStrLn ""
 
 lineFilter :: String -> Bool
 lineFilter l
