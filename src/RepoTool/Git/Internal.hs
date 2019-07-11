@@ -15,7 +15,7 @@ import qualified System.Process as Process
 
 
 gitBinary :: String
-gitBinary = "/usr/bin/git"
+gitBinary = "git"
 
 printRepoName :: String -> IO ()
 printRepoName name = do
