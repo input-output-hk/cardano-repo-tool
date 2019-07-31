@@ -86,7 +86,7 @@ pCommand =
        $ Opt.progDesc "Update git hashes in cabal.project file (in the current directory) from the stack.yaml file."
        )
     <> Opt.command "update-hash"
-       ( Opt.info (CmdUpdateGitHash <$> pRepoDirectory)
+       ( Opt.info pUpdateGitHash
        $ Opt.progDesc "Get the latest git hashes, and update the stack.yaml and cabal.project file for the specified repo."
        )
     <> Opt.command "update-hashes"
@@ -102,6 +102,10 @@ pCommand =
        $ Opt.progDesc "Update all repos ('git checkout master && git pull --rebase')."
        )
     )
+
+pUpdateGitHash :: Parser Command
+pUpdateGitHash =
+  CmdUpdateGitHash <$> pRepoDirectory
 
 pRepoDirectory :: Parser RepoDirectory
 pRepoDirectory =
