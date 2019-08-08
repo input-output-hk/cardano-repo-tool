@@ -1,5 +1,5 @@
 ############################################################################
-# iohk-skeleton Nix build
+# cardano-repo-tool Nix build
 #
 # fixme: document top-level attributes and how to build them
 #
@@ -38,7 +38,7 @@ let
 
 in {
   inherit pkgs iohkLib src haskellPackages;
-  inherit (haskellPackages.iohk-skeleton.identifier) version;
+  inherit (haskellPackages.cardano-repo-tool.identifier) version;
 
   # Grab the executable component of our package.
   inherit (haskellPackages.cardano-repo-tool.components.exes) cardano-repo-tool;
@@ -49,10 +49,10 @@ in {
   # This provides a development environment that can be used with nix-shell or
   # lorri. See https://input-output-hk.github.io/haskell.nix/user-guide/development/
   shell = haskellPackages.shellFor {
-    name = "iohk-skeleton-shell";
+    name = "cardano-repo-tool-shell";
     # TODO: List all local packages in the project.
     packages = ps: with ps; [
-      iohk-skeleton
+      cardano-repo-tool
     ];
     # These programs will be available inside the nix-shell.
     buildInputs =
