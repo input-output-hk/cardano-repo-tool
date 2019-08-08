@@ -41,8 +41,7 @@ in {
   inherit (haskellPackages.iohk-skeleton.identifier) version;
 
   # Grab the executable component of our package.
-  inherit (haskellPackages.iohk-skeleton.components.exes)
-    iohk-skeleton;
+  inherit (haskellPackages.cardano-repo-tool.components.exes) cardano-repo-tool;
 
   tests = util.collectComponents "tests" util.isIohkSkeleton haskellPackages;
   benchmarks = util.collectComponents "benchmarks" util.isIohkSkeleton haskellPackages;
