@@ -184,6 +184,7 @@ repos =
   map RepoDirectory
     [ "cardano-base"
     , "cardano-byron-proxy"
+    , "cardano-explorer"
     , "cardano-crypto"
     , "cardano-ledger"
     , "cardano-ledger-specs"
