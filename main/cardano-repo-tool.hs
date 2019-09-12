@@ -182,7 +182,8 @@ validateRepos = do
 repos :: [RepoDirectory]
 repos =
   map RepoDirectory
-    [ "cardano-base"
+    [ "goblins"
+    , "cardano-base"
     , "cardano-byron-proxy"
     , "cardano-explorer"
     , "cardano-crypto"
