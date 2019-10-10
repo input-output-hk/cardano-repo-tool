@@ -130,17 +130,19 @@ runRepoTool cmd =
     CmdUpdateGitHash repo -> validateRepos >> updateRepoGitHash repos repo
     CmdUpdateGitHashes -> validateRepos >> updateAllRepoGitHashes repos
     CmdUpdateGitRepo repo -> validateRepos >> gitPullRebase repo
-    CmdUpdateGitRepos ->
-      validateRepos >>
-        mapM_
-          (\repo@(RepoDirectory fpath) ->
-            gitPullRebase repo
-            `catch`
-            (\(e :: SomeException) -> do
-              printRepoName fpath
-              putStr ": "
-              throwIO e))
-          repos
+    CmdUpdateGitRepos -> updateGitRepos
+
+
+updateGitRepos :: IO ()
+updateGitRepos = do
+    validateRepos
+    mapM_ (\r -> gitPullRebase r `catch` handler r) repos
+  where
+    handler :: RepoDirectory -> SomeException -> IO a
+    handler (RepoDirectory fpath) e = do
+      printRepoName fpath
+      putStr ": "
+      throwIO e
 
 cloneRepos :: IO ()
 cloneRepos =
