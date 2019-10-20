@@ -195,6 +195,7 @@ repos =
     , "cardano-prelude"
     , "cardano-shell"
     , "cardano-sl-x509"
+    , "cardano-wallet"
     , "iohk-monitoring-framework"
     , "ouroboros-network"
     ]
