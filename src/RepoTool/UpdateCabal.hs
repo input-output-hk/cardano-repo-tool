@@ -1,7 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 module RepoTool.UpdateCabal
-  ( updateCabalFromStack
+  ( extractRepoInfo
+  , updateCabalFromStack
   ) where
 
 import qualified Data.List as List

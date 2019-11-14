@@ -14,7 +14,7 @@ import qualified Options.Applicative as Opt
 import           RepoTool (RepoDirectory (..), gitCloneRepo, gitRepoStatuses,
                     gitResetChanges, printRepoName, renderRepoHash,
                     updateAllRepoGitHashes, gitPullRebase, updateCabalFromStack,
-                    updateRepoGitHash)
+                    updateRepoGitHash, updateStackFromCabal)
 
 import           System.Directory (doesDirectoryExist)
 import           System.Environment (getProgName)
@@ -47,6 +47,7 @@ data Command
   | CmdUpdateGitHashes
   | CmdUpdateGitRepo RepoDirectory
   | CmdUpdateGitRepos
+  | CmdUpdateStackFromCabal
 
 -- -----------------------------------------------------------------------------
 
@@ -101,6 +102,10 @@ pCommand =
        ( Opt.info (pure CmdUpdateGitRepos)
        $ Opt.progDesc "Update all repos ('git checkout master && git pull --rebase')."
        )
+    <> Opt.command "update-stack-yaml"
+       ( Opt.info (pure CmdUpdateStackFromCabal)
+       $ Opt.progDesc "Update git hashes in stack.yaml file (in the current directory) from the cabal.project file."
+       )
     )
 
 pUpdateGitHash :: Parser Command
@@ -131,7 +136,7 @@ runRepoTool cmd =
     CmdUpdateGitHashes -> validateRepos >> updateAllRepoGitHashes repos
     CmdUpdateGitRepo repo -> validateRepos >> gitPullRebase repo
     CmdUpdateGitRepos -> updateGitRepos
-
+    CmdUpdateStackFromCabal -> updateStackFromCabal
 
 updateGitRepos :: IO ()
 updateGitRepos = do
