@@ -1,11 +1,10 @@
 {
   extras = hackage:
     {
-      packages = { cardano-repo-tool = ./cardano-repo-tool.nix; };
+      packages = {} // { cardano-repo-tool = ./cardano-repo-tool.nix; };
       compiler.version = "8.6.5";
       compiler.nix-name = "ghc865";
       };
   resolver = "lts-13.26";
-  modules = [ ({ lib, ... }: { packages = {}; }) { packages = {}; } ];
   compiler = "ghc-8.6.5";
   }
