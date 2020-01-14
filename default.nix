@@ -8,20 +8,28 @@
 { system ? builtins.currentSystem
 , crossSystem ? null
 , config ? {}
-# Import IOHK common nix lib
-, iohkLib ? import ./nix/iohk-common.nix { inherit system crossSystem config; }
-# Use nixpkgs pin from iohkLib
-, pkgs ? iohkLib.pkgs
+# allows to override dependencies of the project without modifications,
+# eg. to test build against local checkout of nixpkgs and iohk-nix:
+# nix build -f default.nix iohk-skeleton --arg sourcesOverride '{
+#   iohk-nix = ./../iohk-nix;
+#   nixpkgs  = ./../nixpkgs;
+# }'
+, sourcesOverride ? {}
+# pinned version of nixpkgs augmented with iohk overlays.
+, pkgs ? import ./nix {
+    inherit system crossSystem sourcesOverride;
+  }
 }:
-
 let
-  haskell = pkgs.callPackage iohkLib.nix-tools.haskell {};
-  src = iohkLib.cleanSourceHaskell ./.;
-  util = pkgs.callPackage ./nix/util.nix {};
+  # commonLib include iohk-nix utilities and nixpkgs lib.
+  inherit (pkgs) commonLib;
+  haskell = pkgs.callPackage commonLib.nix-tools.haskell {};
+  src = commonLib.cleanSourceHaskell ./.;
+  util = import ./nix/util.nix { inherit pkgs; };
 
   # Example of using a package from iohk-nix
   # TODO: Declare packages required by the build.
-  inherit (iohkLib.rust-packages.pkgs) jormungandr;
+  inherit (commonLib.rust-packages.pkgs) jormungandr;
 
   # Import the Haskell package set.
   haskellPackages = import ./nix/pkgs.nix {
@@ -33,12 +41,12 @@ let
     inherit jormungandr;
     inherit (pkgs) cowsay;
     # Provide cross-compiling secret sauce
-    inherit (iohkLib.nix-tools) iohk-extras iohk-module;
+    inherit (commonLib.nix-tools) iohk-extras iohk-module;
   };
 
 in {
-  inherit pkgs iohkLib src haskellPackages;
   inherit (haskellPackages.cardano-repo-tool.identifier) version;
+  inherit pkgs commonLib src haskellPackages;
 
   # Grab the executable component of our package.
   inherit (haskellPackages.cardano-repo-tool.components.exes) cardano-repo-tool;

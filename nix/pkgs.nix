@@ -33,10 +33,10 @@ let
   pkgSet = haskell.mkStackPkgSet {
     inherit stack-pkgs;
     modules = [
-      # Add source filtering to local packages
+      # Add filtered sources to local packages
       {
         #packages.iohk-skeleton.src = src;
-        # packages.another-package = src + /another-package;
+        # packages.another-package.src = src + /another-package;
       }
 
       # The iohk-module will supply us with the necessary
