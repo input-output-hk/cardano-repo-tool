@@ -5,13 +5,21 @@
 #
 ############################################################################
 
-let
-  commonLib = import ./lib.nix;
-  lib = commonLib.pkgs.lib;
-in
-{ customConfig ? {}
-, target ? builtins.currentSystem
-, interactive ? false
+{ system ? builtins.currentSystem
+, crossSystem ? null
+, config ? {}
+, sources ? import ./nix/sources.nix
+# Use pinned Nixpkgs with Haskell.nix overlay
+, pkgs ? import ./nix/nixpkgs-haskell.nix  { inherit system crossSystem config sources; }
+# Import IOHK common nix lib
+, iohkLib ? import sources.iohk-nix {
+    inherit system crossSystem config;
+    sourcesOverride = {
+      inherit (sources) nixpkgs;
+    };
+  }
+# Use this git revision for stamping executables
+, gitrev ? iohkLib.commitIdFromGitRepoOrZero ./.git
 }:
 #
 # The default.nix file. This will generate targets for all
@@ -42,10 +50,34 @@ in
 # We will need to import the iohk-nix common lib, which includes
 # the nix-tools tooling.
 let
-  system = if target != "x86_64-windows" then target else builtins.currentSystem;
-  crossSystem = if target == "x86_64-windows" then lib.systems.examples.mingwW64 else null;
-  nixTools = import ./nix/nix-tools.nix { inherit system crossSystem; };
+  src = pkgs.haskell-nix.cleanSourceHaskell {
+    src = ./.;
+    name = "cardano-wallet-src";
+  };
+  haskellPackages = import ./nix/pkgs.nix {
+    inherit pkgs src;
+  };
+  niv = (import sources.niv {}).niv;
 in {
-  inherit (nixTools) nix-tools;
-  inherit (commonLib.iohkNix) check-nix-tools check-hydra pkgs;
+  inherit pkgs iohkLib src haskellPackages niv;
+  inherit (iohkLib) nix-tools;
+  inherit (haskellPackages.cardano-repo-tool.identifier) version;
+
+  shell = haskellPackages.shellFor {
+    name = "cardano-repo-tool";
+    packages = ps: with ps; [
+      cardano-repo-tool
+    ];
+    buildInputs = (with pkgs.haskell-nix.haskellPackages; [
+      ghcid.components.exes.ghcid
+      hlint.components.exes.hlint
+      pkgs.haskell-nix.haskellPackages.cabal-install.components.exes.cabal
+      # (pkgs.haskell-nix.hackage-package {
+      #   name = "cabal-install"; version = "3.0.0.0"; }).components.exes.cabal
+    ]) ++ [
+      niv
+      # pkgs.cabal-install
+    ];
+    meta.platforms = pkgs.lib.platforms.unix;
+  };
 }
