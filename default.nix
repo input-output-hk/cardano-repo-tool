@@ -52,11 +52,12 @@
 let
   src = pkgs.haskell-nix.cleanSourceHaskell {
     src = ./.;
-    name = "cardano-wallet-src";
+    name = "cardano-repo-tool";
   };
-  haskellPackages = import ./nix/pkgs.nix {
-    inherit pkgs src;
+  project = pkgs.haskell-nix.cabalProject' {
+    inherit src;
   };
+  haskellPackages = project.hsPkgs;
   niv = (import sources.niv {}).niv;
 in {
   inherit pkgs iohkLib src haskellPackages niv;
@@ -68,12 +69,13 @@ in {
     packages = ps: with ps; [
       cardano-repo-tool
     ];
-    buildInputs = (with pkgs.haskell-nix.haskellPackages; [
-      ghcid.components.exes.ghcid
-      hlint.components.exes.hlint
-      pkgs.haskell-nix.haskellPackages.cabal-install.components.exes.cabal
-      # (pkgs.haskell-nix.hackage-package {
-      #   name = "cabal-install"; version = "3.0.0.0"; }).components.exes.cabal
+    buildInputs = ([
+      (pkgs.haskell-nix.hackage-package {
+         name = "ghcid"; version = "0.8.1"; }).components.exes.ghcid
+      (pkgs.haskell-nix.hackage-package {
+         name = "hlint"; version = "2.2.7"; }).components.exes.hlint
+      (pkgs.haskell-nix.hackage-package {
+         name = "cabal-install"; version = "3.0.0.0"; modules = [{reinstallableLibGhc = true;}]; }).components.exes.cabal
     ]) ++ [
       niv
       # pkgs.cabal-install
