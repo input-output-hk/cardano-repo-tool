@@ -13,8 +13,7 @@ import qualified Options.Applicative as Opt
 
 import           RepoTool (RepoDirectory (..), gitCloneRepo, gitRepoStatuses,
                     gitResetChanges, printRepoName, renderRepoHash,
-                    updateAllRepoGitHashes, gitPullRebase, updateCabalFromStack,
-                    updateRepoGitHash, updateStackFromCabal)
+                    updateAllRepoGitHashes, gitPullRebase, updateRepoGitHash)
 
 import           System.Directory (doesDirectoryExist)
 import           System.Environment (getProgName)
@@ -42,12 +41,13 @@ data Command
   | CmdListRepos
   | CmdRepoStatus
   | CmdResetChanges
-  | CmdUpdateCabalFromStack
   | CmdUpdateGitHash RepoDirectory
   | CmdUpdateGitHashes
   | CmdUpdateGitRepo RepoDirectory
   | CmdUpdateGitRepos
-  | CmdUpdateStackFromCabal
+
+  -- | CmdUpdateCabalFromStack
+  -- | CmdUpdateStackFromCabal
 
 -- -----------------------------------------------------------------------------
 
@@ -82,10 +82,6 @@ pCommand =
        ( Opt.info (pure CmdResetChanges)
        $ Opt.progDesc "Reset any changes to the cabal.project and stack.yaml files."
        )
-    <> Opt.command "update-cabal-project"
-       ( Opt.info (pure CmdUpdateCabalFromStack)
-       $ Opt.progDesc "Update git hashes in cabal.project file (in the current directory) from the stack.yaml file."
-       )
     <> Opt.command "update-hash"
        ( Opt.info pUpdateGitHash
        $ Opt.progDesc "Get the latest git hashes, and update the stack.yaml and cabal.project file for the specified repo."
@@ -102,10 +98,16 @@ pCommand =
        ( Opt.info (pure CmdUpdateGitRepos)
        $ Opt.progDesc "Update all repos ('git checkout master && git pull --rebase')."
        )
+    {-
+    <> Opt.command "update-cabal-project"
+       ( Opt.info (pure CmdUpdateCabalFromStack)
+       $ Opt.progDesc "Update git hashes in cabal.project file (in the current directory) from the stack.yaml file."
+       )
     <> Opt.command "update-stack-yaml"
        ( Opt.info (pure CmdUpdateStackFromCabal)
        $ Opt.progDesc "Update git hashes in stack.yaml file (in the current directory) from the cabal.project file."
        )
+    -}
     )
 
 pUpdateGitHash :: Parser Command
@@ -131,12 +133,13 @@ runRepoTool cmd =
     CmdListRepos -> listRepos
     CmdRepoStatus -> validateRepos >> gitRepoStatuses repos
     CmdResetChanges -> validateRepos >> gitResetChanges repos
-    CmdUpdateCabalFromStack -> updateCabalFromStack
     CmdUpdateGitHash repo -> validateRepos >> updateRepoGitHash repos repo
     CmdUpdateGitHashes -> validateRepos >> updateAllRepoGitHashes repos
     CmdUpdateGitRepo repo -> validateRepos >> gitPullRebase repo
     CmdUpdateGitRepos -> updateGitRepos
-    CmdUpdateStackFromCabal -> updateStackFromCabal
+
+    -- CmdUpdateCabalFromStack -> updateCabalFromStack
+    -- CmdUpdateStackFromCabal -> updateStackFromCabal
 
 updateGitRepos :: IO ()
 updateGitRepos = do
