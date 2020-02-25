@@ -3,3 +3,7 @@ compiler: ghc-8.6.5
 
 packages:
   - .
+
+extra-deps:
+  - git: https://github.com/input-output-hk/nix-archive
+    commit: 6ec16124fa060818b2dbd4b6e99b0ce4906c59e6
