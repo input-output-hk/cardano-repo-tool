@@ -13,7 +13,7 @@ import qualified Options.Applicative as Opt
 
 import           RepoTool (RepoDirectory (..), gitCloneRepo, gitRepoStatuses,
                     gitResetChanges, printRepoName, renderRepoHash,
-                    updateAllRepoGitHashes, gitPullRebase, updateRepoGitHash)
+                    updateAllRepoGitHashes, gitPullRebase, updateRepoGitHash, updateStackFromCabal)
 
 import           System.Directory (doesDirectoryExist)
 import           System.Environment (getProgName)
@@ -45,9 +45,9 @@ data Command
   | CmdUpdateGitHashes
   | CmdUpdateGitRepo RepoDirectory
   | CmdUpdateGitRepos
+  | CmdUpdateStackFromCabal
 
   -- | CmdUpdateCabalFromStack
-  -- | CmdUpdateStackFromCabal
 
 -- -----------------------------------------------------------------------------
 
@@ -98,14 +98,14 @@ pCommand =
        ( Opt.info (pure CmdUpdateGitRepos)
        $ Opt.progDesc "Update all repos ('git checkout master && git pull --rebase')."
        )
+    <> Opt.command "update-stack-yaml"
+       ( Opt.info (pure CmdUpdateStackFromCabal)
+       $ Opt.progDesc "Update git hashes in stack.yaml file (in the current directory) from the cabal.project file."
+       )
     {-
     <> Opt.command "update-cabal-project"
        ( Opt.info (pure CmdUpdateCabalFromStack)
        $ Opt.progDesc "Update git hashes in cabal.project file (in the current directory) from the stack.yaml file."
-       )
-    <> Opt.command "update-stack-yaml"
-       ( Opt.info (pure CmdUpdateStackFromCabal)
-       $ Opt.progDesc "Update git hashes in stack.yaml file (in the current directory) from the cabal.project file."
        )
     -}
     )
@@ -137,9 +137,9 @@ runRepoTool cmd =
     CmdUpdateGitHashes -> validateRepos >> updateAllRepoGitHashes repos
     CmdUpdateGitRepo repo -> validateRepos >> gitPullRebase repo
     CmdUpdateGitRepos -> updateGitRepos
+    CmdUpdateStackFromCabal -> updateStackFromCabal
 
     -- CmdUpdateCabalFromStack -> updateCabalFromStack
-    -- CmdUpdateStackFromCabal -> updateStackFromCabal
 
 updateGitRepos :: IO ()
 updateGitRepos = do
