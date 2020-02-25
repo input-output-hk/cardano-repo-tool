@@ -60,52 +60,53 @@ pVersion =
 
 pCommand :: Parser Command
 pCommand =
-  Opt.subparser
-    ( Opt.command "clone-repos"
-       ( Opt.info (pure CmdCloneRepos)
-       $ Opt.progDesc "Clone any missing repos into the current directory."
-       )
-    <> Opt.command "print-hashes"
-       ( Opt.info (pure CmdPrintGitHashes)
-       $ Opt.progDesc "Print the git hashes for the relevant repos."
-       )
-    <> Opt.command "list-repos"
-       ( Opt.info (pure CmdListRepos)
-       $ Opt.progDesc "List the repos expected by this tool."
-       )
-    <> Opt.command "repo-status"
-       ( Opt.info (pure CmdRepoStatus)
-       $ Opt.progDesc "List the statuses of each repo."
-       )
-    <> Opt.command "reset-changes"
-       ( Opt.info (pure CmdResetChanges)
-       $ Opt.progDesc "Reset any changes to the cabal.project and stack.yaml files."
-       )
-    <> Opt.command "update-hash"
-       ( Opt.info pUpdateGitHash
-       $ Opt.progDesc "Get the latest git hashes, and update the stack.yaml and cabal.project file for the specified repo."
-       )
-    <> Opt.command "update-hashes"
-       ( Opt.info (pure CmdUpdateGitHashes)
-       $ Opt.progDesc "Get the latest git hashes, and update all stack.yaml and cabal.project files."
-       )
-    <> Opt.command "update-repo"
-       ( Opt.info (CmdUpdateGitRepo <$> pRepoDirectory)
-       $ Opt.progDesc "Update a single repo ('git checkout master && git pull --rebase')."
-       )
-    <> Opt.command "update-repos"
-       ( Opt.info (pure CmdUpdateGitRepos)
-       $ Opt.progDesc "Update all repos ('git checkout master && git pull --rebase')."
-       )
-    <> Opt.command "update-stack-yaml"
-       ( Opt.info (pure CmdUpdateStackFromCabal)
-       $ Opt.progDesc "Update git hashes in stack.yaml file (in the current directory) from the cabal.project file."
-       )
-    <> Opt.command "update-cabal-project"
-       ( Opt.info (pure CmdUpdateCabalFromStack)
-       $ Opt.progDesc "Update git hashes in cabal.project file (in the current directory) from the stack.yaml file."
-       )
-    )
+  Opt.subparser $
+    mconcat
+      [ Opt.command "clone-repos"
+         ( Opt.info (pure CmdCloneRepos)
+         $ Opt.progDesc "Clone any missing repos into the current directory."
+         )
+      , Opt.command "print-hashes"
+         ( Opt.info (pure CmdPrintGitHashes)
+         $ Opt.progDesc "Print the git hashes for the relevant repos."
+         )
+      , Opt.command "list-repos"
+         ( Opt.info (pure CmdListRepos)
+         $ Opt.progDesc "List the repos expected by this tool."
+         )
+      , Opt.command "repo-status"
+         ( Opt.info (pure CmdRepoStatus)
+         $ Opt.progDesc "List the statuses of each repo."
+         )
+      , Opt.command "reset-changes"
+         ( Opt.info (pure CmdResetChanges)
+         $ Opt.progDesc "Reset any changes to the cabal.project and stack.yaml files."
+         )
+      , Opt.command "update-hash"
+         ( Opt.info pUpdateGitHash
+         $ Opt.progDesc "Get the latest git hashes, and update the stack.yaml and cabal.project file for the specified repo."
+         )
+      , Opt.command "update-hashes"
+         ( Opt.info (pure CmdUpdateGitHashes)
+         $ Opt.progDesc "Get the latest git hashes, and update all stack.yaml and cabal.project files."
+         )
+      , Opt.command "update-repo"
+         ( Opt.info (CmdUpdateGitRepo <$> pRepoDirectory)
+         $ Opt.progDesc "Update a single repo ('git checkout master && git pull --rebase')."
+         )
+      , Opt.command "update-repos"
+         ( Opt.info (pure CmdUpdateGitRepos)
+         $ Opt.progDesc "Update all repos ('git checkout master && git pull --rebase')."
+         )
+      , Opt.command "update-stack-yaml"
+         ( Opt.info (pure CmdUpdateStackFromCabal)
+         $ Opt.progDesc "Update git hashes in stack.yaml file (in the current directory) from the cabal.project file."
+         )
+      , Opt.command "update-cabal-project"
+         ( Opt.info (pure CmdUpdateCabalFromStack)
+         $ Opt.progDesc "Update git hashes in cabal.project file (in the current directory) from the stack.yaml file."
+         )
+      ]
 
 pUpdateGitHash :: Parser Command
 pUpdateGitHash =
