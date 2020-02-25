@@ -27,10 +27,12 @@ library
   ghc-options:         -Wall -fwarn-tabs
 
   exposed-modules:     RepoTool
+
   other-modules:       RepoTool.Git
                        RepoTool.Git.Internal
                        RepoTool.Git.PullRebase
                        RepoTool.Git.Status
+                       RepoTool.Nix
                        RepoTool.Text
                        RepoTool.Types
                        RepoTool.UpdateCabal
@@ -42,6 +44,7 @@ library
                      , containers
                      , directory
                      , filepath
+                     , nix-archive
                      , process
                      , text
 

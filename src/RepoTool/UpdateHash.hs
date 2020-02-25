@@ -1,7 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 module RepoTool.UpdateHash
-  ( updateHashes
+  ( extractRepoNames
+  , updateHashes
   , updateUrlHashes
   ) where
 
@@ -11,10 +12,12 @@ import           Control.Monad (when)
 
 import qualified Data.List as List
 import qualified Data.Map.Strict as Map
+import           Data.Maybe (mapMaybe)
 import           Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 
+import           RepoTool.Nix
 import           RepoTool.Text
 import           RepoTool.Types
 
@@ -22,13 +25,20 @@ import           System.FilePath ((</>))
 
 
 updateHashes :: RepoDirectory -> ConfigType -> RepoInfoMap -> IO ()
-updateHashes rd cfgType rmap = do
+updateHashes rd cfgType rmapOrig = do
   let configFile = getConfigFile rd cfgType
-  result <- Expection.try $ Text.readFile configFile
+  result <- Expection.try (Text.readFile configFile)
   case result of
     Left (_ :: IOException) -> pure ()   -- File didn't exist. Nothing to do.
     Right before -> do
-      let after = concatParts $ updateUrlHashes rmap (splitIntoParts before)
+      let parts = splitIntoParts before
+      rmap <- case cfgType of
+                ConfigCabalProject ->
+                  getAllNixShas $ repoMapFilter rmapOrig (extractRepoNames parts)
+                ConfigStackYaml ->
+                  pure rmapOrig
+
+      let after = concatParts $ updateUrlHashes rmap parts
       when (after /= before) $ do
         putStrLn $ "Updated " ++ configFile
         Text.writeFile configFile after
@@ -42,12 +52,12 @@ updateUrlHashes rmap =
     case tp of
       TextWhitespace _ -> (mrepo, tp)
       TextReadable _ -> (mrepo, tp)
-      TextGitRepo txt -> (Map.lookup (gitNameFromUrl $ RepoUrl txt) rmap, updateUrlHash rmap (RepoUrl txt))
-      TextGitHash _ -> (Nothing, maybe tp (TextGitHash . unGitHash . riHash) mrepo)
+      TextGitRepo txt -> (Map.lookup (gitNameFromUrl $ RepoUrl txt) rmap, updateGitHash rmap (RepoUrl txt))
+      TextGitHash _ -> (mrepo, maybe tp (TextGitHash . unGitHash . riGitHash) mrepo)
+      TextNixSha _ -> (mrepo, maybe tp (maybe tp (TextNixSha . unNixSha) . riNixSha) mrepo)
 
-
-updateUrlHash :: RepoInfoMap -> RepoUrl -> TextPart
-updateUrlHash rmap (RepoUrl txt) = do
+updateGitHash :: RepoInfoMap -> RepoUrl -> TextPart
+updateGitHash rmap (RepoUrl txt) = do
   let repoNames = map unRepoName $ Map.keys rmap
       parts = Text.splitOn "/" txt
       hasHash = any isGitHash parts
@@ -59,19 +69,27 @@ updateUrlHash rmap (RepoUrl txt) = do
         (name:_) ->
           case Map.lookup (RepoName name) rmap of
             Nothing -> TextGitRepo txt
-            Just ri -> TextGitRepo $ Text.intercalate "/" (map (replaceHash ri) parts)
+            Just ri -> TextGitRepo $ Text.intercalate "/" (map (replaceGitHash ri) parts)
 
  where
-   replaceHash :: RepoInfo -> Text -> Text
-   replaceHash ri tp =
+   replaceGitHash :: RepoInfo -> Text -> Text
+   replaceGitHash ri tp =
      if isGitHash tp
-       then unGitHash $ riHash ri
+       then unGitHash $ riGitHash ri
        else tp
+
+extractRepoNames :: [TextPart] -> [RepoName]
+extractRepoNames =
+    List.nub . List.sort . mapMaybe getRepoName
+  where
+    getRepoName :: TextPart -> Maybe RepoName
+    getRepoName tp =
+      case tp of
+        TextGitRepo url -> Just $ gitNameFromUrl (RepoUrl url)
+        _otherwise -> Nothing
 
 getConfigFile :: RepoDirectory -> ConfigType -> FilePath
 getConfigFile (RepoDirectory fpath) cfgFile =
   case cfgFile of
     ConfigCabalProject -> fpath </> "cabal.project"
     ConfigStackYaml -> fpath </> "stack.yaml"
-
-

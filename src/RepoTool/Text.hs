@@ -3,6 +3,8 @@ module RepoTool.Text
   ( concatParts
   , gitRepoName
   , isGitHash
+  , isNixSha
+  , isNixShaChar
   , splitIntoParts
   ) where
 
@@ -23,6 +25,7 @@ concatParts tps =
       TextReadable txt -> txt
       TextGitHash txt -> txt
       TextGitRepo txt -> txt
+      TextNixSha txt -> txt
 
 gitRepoName :: TextPart -> Maybe RepoName
 gitRepoName tp =
@@ -30,6 +33,7 @@ gitRepoName tp =
     TextWhitespace _ -> Nothing
     TextReadable _ -> Nothing
     TextGitHash _ -> Nothing
+    TextNixSha _ -> Nothing
     TextGitRepo txt -> Just $ gitNameFromUrl (RepoUrl txt)
 
 splitIntoParts :: Text -> [TextPart]
@@ -62,12 +66,20 @@ takeReadable txt =
 mkReadable :: Text -> TextPart
 mkReadable txt
   | isGitHash txt = TextGitHash txt
+  | isNixSha txt = TextNixSha txt
   | isGitRepo txt = TextGitRepo txt
   | otherwise = TextReadable txt
 
 isGitHash :: Text -> Bool
 isGitHash txt =
   Text.length txt == 40 && Text.all Char.isHexDigit txt
+
+isNixSha :: Text -> Bool
+isNixSha txt =
+    Text.length txt == 52 && Text.all isNixShaChar txt
+
+isNixShaChar :: Char -> Bool
+isNixShaChar c = Char.isDigit c || Char.isLower c
 
 isGitRepo :: Text -> Bool
 isGitRepo txt =

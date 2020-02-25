@@ -4,6 +4,7 @@
 module RepoTool.Types
   ( ConfigType (..)
   , GitHash (..)
+  , NixSha (..)
   , RepoDirectory (..)
   , RepoInfo (..)
   , RepoInfoMap
@@ -13,6 +14,7 @@ module RepoTool.Types
 
   , gitNameFromUrl
   , repoMapify
+  , repoMapFilter
   ) where
 
 import           Data.Text (Text)
@@ -31,15 +33,20 @@ newtype GitHash
   = GitHash { unGitHash :: Text }
   deriving (Eq, Show)
 
+newtype NixSha
+  = NixSha { unNixSha :: Text }
+  deriving (Eq, Show)
+
 newtype RepoDirectory
   = RepoDirectory { unRepoDirectory :: FilePath }
   deriving (Eq, Show)
 
 data RepoInfo = RepoInfo
   { riDirectory :: !RepoDirectory
-  , riHash :: !GitHash
   , riName :: !RepoName
   , riUrl :: !RepoUrl
+  , riGitHash :: !GitHash
+  , riNixSha :: !(Maybe NixSha) -- Stack.yaml does not contain this field.
   }
   deriving (Eq, Show)
 
@@ -59,6 +66,7 @@ data TextPart
   | TextReadable !Text
   | TextGitHash !Text
   | TextGitRepo !Text
+  | TextNixSha !Text
   deriving (Eq, Show)
 
 
@@ -69,3 +77,7 @@ gitNameFromUrl (RepoUrl txt) =
 repoMapify :: [RepoInfo] -> RepoInfoMap
 repoMapify =
   Map.fromList . map (\ ri -> (riName ri, ri))
+
+repoMapFilter :: RepoInfoMap -> [RepoName] -> RepoInfoMap
+repoMapFilter rmap _names = rmap
+  -- Map.filterWithKey (\ k _ -> k `elem` names) rmap
