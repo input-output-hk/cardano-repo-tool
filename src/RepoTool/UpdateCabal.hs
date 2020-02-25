@@ -6,13 +6,16 @@ module RepoTool.UpdateCabal
   ) where
 
 import qualified Data.List as List
-import           Data.Maybe (fromMaybe, mapMaybe)
+import           Data.Maybe (mapMaybe)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 
+import           RepoTool.Nix
 import           RepoTool.Text
 import           RepoTool.Types
 import           RepoTool.UpdateHash
+
+import           System.Directory (withCurrentDirectory)
 
 -- | Read all git repository/hash pairs from the stack.yaml file and apply
 -- them to the cabal.project file in the same directory.
@@ -20,9 +23,13 @@ updateCabalFromStack :: IO ()
 updateCabalFromStack = do
   stackParts <- splitIntoParts <$> Text.readFile "stack.yaml"
   cabalParts <- splitIntoParts <$> Text.readFile "cabal.project"
-  Text.writeFile "cabal.project" $ do
-    let repoNames = extractRepoNames cabalParts
-    concatParts (updateUrlHashes (repoMapFilter (extractRepoInfo stackParts) repoNames) cabalParts)
+
+  let repoNames = extractRepoNames cabalParts
+  stackRepInfo <- withCurrentDirectory ".." $
+                    getAllNixShas (extractRepoInfo stackParts)
+
+  Text.writeFile "cabal.project" $
+    concatParts (updateUrlHashes (repoMapFilter stackRepInfo repoNames) cabalParts)
 
 extractRepoInfo :: [TextPart] -> RepoInfoMap
 extractRepoInfo =
@@ -45,17 +52,12 @@ foldParts =
 
     convert :: (Maybe RepoUrl, Maybe GitHash, Maybe NixSha) -> Maybe RepoInfo
     convert (mr, mg, mn) =
-      case mr of
-        Nothing -> Nothing
-        Just repo ->
+      case (mr, mg) of
+        (Nothing, _) -> Nothing
+        (_, Nothing) -> Nothing
+        (Just repo, Just hash) ->
           let name = gitNameFromUrl repo in
-          Just $ RepoInfo (RepoDirectory "") name repo
-                    (fromMaybe (errorName name) mg)
-                    mn
-
-    errorName :: RepoName -> a
-    errorName (RepoName name) =
-      error $ "Not able to find git hash for repo " ++ Text.unpack name
+          Just $ RepoInfo (RepoDirectory . Text.unpack $ unRepoName name) name repo hash mn
 
 groupRepos :: [TextPart] -> [[TextPart]]
 groupRepos parts =

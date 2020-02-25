@@ -11,9 +11,9 @@ import qualified Data.Text.IO as Text
 import           Options.Applicative (Parser, ParserInfo, ParserPrefs)
 import qualified Options.Applicative as Opt
 
-import           RepoTool (RepoDirectory (..), gitCloneRepo, gitRepoStatuses,
-                    gitResetChanges, printRepoName, renderRepoHash,
-                    updateAllRepoGitHashes, gitPullRebase, updateRepoGitHash, updateStackFromCabal)
+import           RepoTool (RepoDirectory (..), gitCloneRepo, gitPullRebase, gitRepoStatuses,
+                    gitResetChanges, printRepoName, renderRepoHash, updateAllRepoGitHashes,
+                    updateCabalFromStack, updateRepoGitHash, updateStackFromCabal)
 
 import           System.Directory (doesDirectoryExist)
 import           System.Environment (getProgName)
@@ -46,8 +46,7 @@ data Command
   | CmdUpdateGitRepo RepoDirectory
   | CmdUpdateGitRepos
   | CmdUpdateStackFromCabal
-
-  -- | CmdUpdateCabalFromStack
+  | CmdUpdateCabalFromStack
 
 -- -----------------------------------------------------------------------------
 
@@ -102,12 +101,10 @@ pCommand =
        ( Opt.info (pure CmdUpdateStackFromCabal)
        $ Opt.progDesc "Update git hashes in stack.yaml file (in the current directory) from the cabal.project file."
        )
-    {-
     <> Opt.command "update-cabal-project"
        ( Opt.info (pure CmdUpdateCabalFromStack)
        $ Opt.progDesc "Update git hashes in cabal.project file (in the current directory) from the stack.yaml file."
        )
-    -}
     )
 
 pUpdateGitHash :: Parser Command
@@ -138,8 +135,7 @@ runRepoTool cmd =
     CmdUpdateGitRepo repo -> validateRepos >> gitPullRebase repo
     CmdUpdateGitRepos -> updateGitRepos
     CmdUpdateStackFromCabal -> updateStackFromCabal
-
-    -- CmdUpdateCabalFromStack -> updateCabalFromStack
+    CmdUpdateCabalFromStack -> updateCabalFromStack
 
 updateGitRepos :: IO ()
 updateGitRepos = do

@@ -72,7 +72,10 @@ data TextPart
 
 gitNameFromUrl :: RepoUrl -> RepoName
 gitNameFromUrl (RepoUrl txt) =
-  RepoName (Text.takeWhile (/= '.') . List.last $ Text.splitOn "/" txt)
+  case List.drop 4 (Text.splitOn "/" txt) of
+    [] -> RepoName txt
+    [name] -> RepoName (Text.takeWhile (/= '.') name)
+    (name:_) -> RepoName (Text.takeWhile (/= '.') name)
 
 repoMapify :: [RepoInfo] -> RepoInfoMap
 repoMapify =

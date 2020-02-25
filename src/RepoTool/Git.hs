@@ -46,7 +46,13 @@ getRepoInfo :: RepoDirectory -> IO RepoInfo
 getRepoInfo rd = do
   gh <- getGitHash rd
   url <- getRepoUrl rd
-  pure $ RepoInfo rd (gitNameFromUrl url) url gh Nothing
+  let name = gitNameFromUrl url
+  pure $ RepoInfo
+            (if null (unRepoDirectory rd)
+                then RepoDirectory (Text.unpack $ unRepoName name)
+                else rd
+                )
+            name url gh Nothing
 
 getRepoUrl :: RepoDirectory -> IO RepoUrl
 getRepoUrl (RepoDirectory fpath) = do
