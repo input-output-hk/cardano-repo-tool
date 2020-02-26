@@ -5,5 +5,10 @@ packages:
   - .
 
 extra-deps:
+
+  - optparse-applicative-0.15.1.0
+  - quiet-0.2
+  - transformers-except-0.1.1
+
   - git: https://github.com/input-output-hk/nix-archive
-    commit: 6ec16124fa060818b2dbd4b6e99b0ce4906c59e6
+    commit: 77bf9df2f27156bc121ab581f1108a0062d5367e

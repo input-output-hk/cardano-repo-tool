@@ -4,5 +4,5 @@ packages:
 source-repository-package
   type: git
   location: https://github.com/input-output-hk/nix-archive
-  tag: 6ec16124fa060818b2dbd4b6e99b0ce4906c59e6
+  tag: 77bf9df2f27156bc121ab581f1108a0062d5367e
 
