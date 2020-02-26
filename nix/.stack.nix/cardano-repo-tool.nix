@@ -22,6 +22,7 @@
           (hsPkgs.containers)
           (hsPkgs.directory)
           (hsPkgs.filepath)
+          (hsPkgs.nix-archive)
           (hsPkgs.process)
           (hsPkgs.text)
           ];
