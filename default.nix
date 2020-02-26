@@ -1,7 +1,7 @@
 ############################################################################
 # cardano-repo-tool Nix build
 #
-# nix build -f default.nix -A cardano-repo-tool
+# nix build -f default.nix cardano-repo-tool
 #
 ############################################################################
 
