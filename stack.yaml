@@ -11,4 +11,4 @@ extra-deps:
   - transformers-except-0.1.1
 
   - git: https://github.com/input-output-hk/nix-archive
-    commit: 77bf9df2f27156bc121ab581f1108a0062d5367e
+    commit: a769a43867a8c93f1cabc554598eeb1e4e6c45e2
