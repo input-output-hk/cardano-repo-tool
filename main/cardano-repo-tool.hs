@@ -194,7 +194,6 @@ repos =
     , "cardano-byron-proxy"
     , "cardano-db-sync"
     , "cardano-crypto"
-    , "cardano-haskell"
     , "cardano-ledger"
     , "cardano-ledger-specs"
     , "cardano-node"
