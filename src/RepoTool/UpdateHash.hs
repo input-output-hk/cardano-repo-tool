@@ -6,9 +6,8 @@ module RepoTool.UpdateHash
   , updateUrlHashes
   ) where
 
-import           Control.Exception (IOException)
+import           Control.Exception (IOException, throwIO)
 import qualified Control.Exception as Expection
-import           Control.Monad (when)
 
 import qualified Data.List as List
 import qualified Data.Map.Strict as Map
@@ -22,14 +21,18 @@ import           RepoTool.Text
 import           RepoTool.Types
 
 import           System.FilePath ((</>))
+import           System.IO.Error
 
 
 updateHashes :: RepoDirectory -> ConfigType -> RepoInfoMap -> IO ()
 updateHashes rd cfgType rmapOrig = do
   let configFile = getConfigFile rd cfgType
+  putStrLn $ "Updating " ++ configFile ++ " ..."
   result <- Expection.try (Text.readFile configFile)
   case result of
-    Left (_ :: IOException) -> pure ()   -- File didn't exist. Nothing to do.
+    Left (ioe :: IOException)
+      | isDoesNotExistError ioe -> pure ()   -- File didn't exist. Nothing to do.
+      | otherwise -> throwIO ioe
     Right before -> do
       let parts = splitIntoParts before
       rmap <- case cfgType of
@@ -39,9 +42,10 @@ updateHashes rd cfgType rmapOrig = do
                   pure rmapOrig
 
       let after = concatParts $ updateUrlHashes rmap parts
-      when (after /= before) $ do
-        putStrLn $ "Updated " ++ configFile
-        Text.writeFile configFile after
+      if (after /= before)
+        then do putStrLn $ "Updated  " ++ configFile
+                Text.writeFile configFile after
+        else putStrLn $ "No changes to " ++ configFile
 
 updateUrlHashes :: RepoInfoMap -> [TextPart] -> [TextPart]
 updateUrlHashes rmap =
