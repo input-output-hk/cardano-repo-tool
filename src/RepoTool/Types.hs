@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TupleSections #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
 module RepoTool.Types
   ( ConfigType (..)
@@ -20,6 +21,7 @@ module RepoTool.Types
 import           Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.List as List
+import           System.FilePath
 
 import           Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
@@ -71,11 +73,13 @@ data TextPart
 
 
 gitNameFromUrl :: RepoUrl -> RepoName
-gitNameFromUrl (RepoUrl txt) =
-  case List.drop 4 (Text.splitOn "/" txt) of
-    [] -> RepoName txt
-    [name] -> RepoName (Text.takeWhile (/= '.') name)
-    (name:_) -> RepoName (Text.takeWhile (/= '.') name)
+gitNameFromUrl = 
+      RepoName
+    . Text.pack
+    . takeBaseName
+    . dropTrailingPathSeparator
+    . Text.unpack
+    . unRepoUrl
 
 repoMapify :: [RepoInfo] -> RepoInfoMap
 repoMapify =
