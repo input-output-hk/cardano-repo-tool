@@ -8,7 +8,6 @@ module RepoTool.UpdateHash
 
 import           Control.Exception (IOException, throwIO)
 import qualified Control.Exception as Expection
-import           Control.Monad (when)
 
 import qualified Data.List as List
 import qualified Data.Map.Strict as Map
@@ -28,6 +27,7 @@ import           System.IO.Error
 updateHashes :: RepoDirectory -> ConfigType -> RepoInfoMap -> IO ()
 updateHashes rd cfgType rmapOrig = do
   let configFile = getConfigFile rd cfgType
+  putStrLn $ "Updating " ++ configFile ++ " ..."
   result <- Expection.try (Text.readFile configFile)
   case result of
     Left (ioe :: IOException)
@@ -42,9 +42,10 @@ updateHashes rd cfgType rmapOrig = do
                   pure rmapOrig
 
       let after = concatParts $ updateUrlHashes rmap parts
-      when (after /= before) $ do
-        putStrLn $ "Updated " ++ configFile
-        Text.writeFile configFile after
+      if (after /= before)
+        then do putStrLn $ "Updated  " ++ configFile
+                Text.writeFile configFile after
+        else putStrLn $ "No changes to " ++ configFile
 
 updateUrlHashes :: RepoInfoMap -> [TextPart] -> [TextPart]
 updateUrlHashes rmap =
