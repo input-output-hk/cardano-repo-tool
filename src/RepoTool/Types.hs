@@ -20,7 +20,6 @@ module RepoTool.Types
 
 import           Data.Text (Text)
 import qualified Data.Text as Text
-import qualified Data.List as List
 import           System.FilePath
 
 import           Data.Map.Strict (Map)
@@ -73,7 +72,7 @@ data TextPart
 
 
 gitNameFromUrl :: RepoUrl -> RepoName
-gitNameFromUrl = 
+gitNameFromUrl =
       RepoName
     . Text.pack
     . takeBaseName
