@@ -191,6 +191,7 @@ repos =
   map RepoDirectory
     [ "goblins"
     , "cardano-base"
+    , "cardano-benchmarking"
     , "cardano-byron-proxy"
     , "cardano-db-sync"
     , "cardano-crypto"
