@@ -195,7 +195,6 @@ repos =
     , "cardano-byron-proxy"
     , "cardano-db-sync"
     , "cardano-crypto"
-    , "cardano-ledger"
     , "cardano-ledger-specs"
     , "cardano-node"
     , "cardano-prelude"
@@ -206,4 +205,3 @@ repos =
     , "iohk-monitoring-framework"
     , "ouroboros-network"
     ]
-
