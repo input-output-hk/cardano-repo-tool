@@ -190,6 +190,7 @@ repos :: [RepoDirectory]
 repos =
   map RepoDirectory
     [ "goblins"
+    , "cardano-addresses"
     , "cardano-base"
     -- Benchmarking uses git subnodules and CRT does not work with submodules and
     -- I do not have time to figure out why.
@@ -203,6 +204,7 @@ repos =
     , "cardano-rest"
     , "cardano-shell"
     , "cardano-sl-x509"
+    , "cardano-transactions"
     , "cardano-wallet"
     , "iohk-monitoring-framework"
     , "ouroboros-network"
