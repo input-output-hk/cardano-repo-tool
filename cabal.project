@@ -1,7 +1,9 @@
+index-state: 2020-10-01T00:00:00Z
+
 packages:
   ./
 
 source-repository-package
   type: git
   location: https://github.com/input-output-hk/nix-archive
-  tag: 8f55eff935d568cf5473af44f15b8131b4cee5d9
+  tag: 7dcf21b2af54d0ab267f127b6bd8fa0b31cfa49d
