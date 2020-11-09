@@ -13,7 +13,8 @@ import qualified Options.Applicative as Opt
 
 import           RepoTool (RepoDirectory (..), gitCloneRepo, gitPullRebase, gitRepoStatuses,
                     gitResetChanges, printRepoName, renderRepoHash, updateAllRepoGitHashes,
-                    updateCabalFromStack, updateRepoGitHash, updateStackFromCabal)
+                    updateCabalFromStack, updateRepoGitHash, updateCabalFromExternal,
+                    updateStackFromCabal)
 
 import           System.Directory (doesDirectoryExist)
 import           System.Environment (getProgName)
@@ -47,6 +48,7 @@ data Command
   | CmdUpdateGitRepos
   | CmdUpdateStackFromCabal
   | CmdUpdateCabalFromStack
+  | CmdUpdateCabalFromExternal FilePath
 
 -- -----------------------------------------------------------------------------
 
@@ -106,6 +108,10 @@ pCommand =
          ( Opt.info (pure CmdUpdateCabalFromStack)
          $ Opt.progDesc "Update git hashes in cabal.project file (in the current directory) from the stack.yaml file."
          )
+      , Opt.command "from-external-cabal-project"
+         ( Opt.info (CmdUpdateCabalFromExternal <$> pCabalProjectFile)
+         $ Opt.progDesc "Update git hashes in cabal.project file from an external cabal.prokect file."
+         )
       ]
 
 pUpdateGitHash :: Parser Command
@@ -120,6 +126,13 @@ pRepoDirectory =
       <> Opt.short 'r'
       <> Opt.help "A specific repo."
       )
+
+pCabalProjectFile :: Parser FilePath
+pCabalProjectFile =
+  Opt.strOption
+    (  Opt.long "project"
+    <> Opt.help "An external cabal.project file."
+    )
 
 -- -----------------------------------------------------------------------------
 
@@ -137,6 +150,7 @@ runRepoTool cmd =
     CmdUpdateGitRepos -> updateGitRepos
     CmdUpdateStackFromCabal -> updateStackFromCabal
     CmdUpdateCabalFromStack -> updateCabalFromStack
+    CmdUpdateCabalFromExternal fp -> updateCabalFromExternal fp
 
 updateGitRepos :: IO ()
 updateGitRepos = do

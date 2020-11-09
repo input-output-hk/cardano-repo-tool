@@ -2,6 +2,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module RepoTool.UpdateCabal
   ( extractRepoInfo
+  , updateCabalFromExternal
   , updateCabalFromStack
   ) where
 
@@ -30,6 +31,21 @@ updateCabalFromStack = do
 
   Text.writeFile "cabal.project" $
     concatParts (updateUrlHashes (repoMapFilter stackRepInfo repoNames) cabalParts)
+
+updateCabalFromExternal :: FilePath -> IO ()
+updateCabalFromExternal cabalProject = do
+  -- TODO: This should also update the hashes for the project where 'otherCabalParts'
+  -- comes from.
+  myCabalParts <- splitIntoParts <$> Text.readFile "cabal.project"
+  otherCabalParts <- splitIntoParts <$> Text.readFile cabalProject
+
+  let repoNames = extractRepoNames myCabalParts
+  repInfo <- withCurrentDirectory ".." $
+                    getAllNixShas (extractRepoInfo otherCabalParts)
+
+  Text.writeFile "cabal.project" $
+    concatParts (updateUrlHashes (repoMapFilter repInfo repoNames) myCabalParts)
+
 
 extractRepoInfo :: [TextPart] -> RepoInfoMap
 extractRepoInfo =
