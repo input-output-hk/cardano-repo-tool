@@ -46,6 +46,7 @@ library
                      , filepath
                      , nix-archive
                      , process
+                     , quiet
                      , text
 
 test-suite test

@@ -48,11 +48,12 @@ getRepoInfo rd = do
   url <- getRepoUrl rd
   let name = gitNameFromUrl url
   pure $ RepoInfo
+            name
             (if null (unRepoDirectory rd)
                 then RepoDirectory (Text.unpack $ unRepoName name)
                 else rd
                 )
-            name url gh Nothing
+            url gh Nothing
 
 getRepoUrl :: RepoDirectory -> IO RepoUrl
 getRepoUrl (RepoDirectory fpath) = do

@@ -73,7 +73,7 @@ foldParts =
         (_, Nothing) -> Nothing
         (Just repo, Just hash) ->
           let name = gitNameFromUrl repo in
-          Just $ RepoInfo (RepoDirectory . Text.unpack $ unRepoName name) name repo hash mn
+          Just $ RepoInfo name (RepoDirectory . Text.unpack $ unRepoName name) repo hash mn
 
 groupRepos :: [TextPart] -> [[TextPart]]
 groupRepos parts =
