@@ -25,6 +25,7 @@ import qualified Data.Text.IO as Text
 import           RepoTool.Git.Internal
 import           RepoTool.Git.PullRebase
 import           RepoTool.Git.Status
+import           RepoTool.RepoInfo
 import           RepoTool.Types
 import           RepoTool.Text
 import           RepoTool.UpdateHash

@@ -33,6 +33,7 @@ library
                        RepoTool.Git.PullRebase
                        RepoTool.Git.Status
                        RepoTool.Nix
+                       RepoTool.RepoInfo
                        RepoTool.Text
                        RepoTool.Types
                        RepoTool.UpdateCabal

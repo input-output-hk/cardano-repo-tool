@@ -17,8 +17,6 @@ module RepoTool.Types
   , TextPart (..)
 
   , gitNameFromUrl
-  , repoMapify
-  , repoMapFilter
   ) where
 
 import           Data.Text (Text)
@@ -26,7 +24,6 @@ import qualified Data.Text as Text
 import           System.FilePath
 
 import           Data.Map.Strict (Map)
-import qualified Data.Map.Strict as Map
 
 import           GHC.Generics
 import           Quiet
@@ -91,11 +88,3 @@ gitNameFromUrl =
     . dropTrailingPathSeparator
     . Text.unpack
     . unRepoUrl
-
-repoMapify :: [RepoInfo] -> RepoInfoMap
-repoMapify =
-  Map.fromList . map (\ ri -> (riName ri, ri))
-
-repoMapFilter :: RepoInfoMap -> [RepoName] -> RepoInfoMap
-repoMapFilter rmap names =
-  Map.filterWithKey (\ k _ -> k `elem` names) rmap
