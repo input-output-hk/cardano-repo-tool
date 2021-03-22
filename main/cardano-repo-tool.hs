@@ -4,8 +4,6 @@
 import           Control.Monad (unless)
 import           Control.Exception (SomeException, throwIO, catch)
 
-import           Data.Monoid ((<>))
-
 import qualified Data.Text.IO as Text
 
 import           Options.Applicative (Parser, ParserInfo, ParserPrefs)

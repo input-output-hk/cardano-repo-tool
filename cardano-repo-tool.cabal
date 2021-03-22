@@ -40,7 +40,7 @@ library
                        RepoTool.UpdateHash
                        RepoTool.UpdateStack
 
-  build-depends:       base                             >= 4.10             && < 5
+  build-depends:       base                             >= 4.14             && < 5
                      , ansi-terminal
                      , containers
                      , directory
