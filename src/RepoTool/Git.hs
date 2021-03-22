@@ -2,7 +2,8 @@
 {-# LANGUAGE TupleSections #-}
 
 module RepoTool.Git
-  ( getGitHash
+  ( getGitBranch
+  , getGitHash
   , getRepoInfo
   , gitCloneRepo
   , gitPullRebase
@@ -18,6 +19,7 @@ module RepoTool.Git
 import           Control.Monad (void, when)
 
 import           Data.Char (isHexDigit)
+import qualified Data.List as List
 import           Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
@@ -35,10 +37,18 @@ import           System.FilePath ((</>))
 import           System.Process (callProcess)
 
 
+getGitBranch :: RepoDirectory -> IO String
+getGitBranch (RepoDirectory fpath) = do
+  xs <- lines <$> readProcess gitBinary [ "-C", fpath, "branch" ]
+  case filter ("*" `List.isPrefixOf`) xs of
+    [] -> pure "master"
+    (str:_) -> pure $ List.drop 2 str
+
 getGitHash :: RepoDirectory -> IO GitHash
-getGitHash (RepoDirectory fpath) = do
+getGitHash rd@(RepoDirectory fpath) = do
+  branch <- getGitBranch rd
   hash <- takeWhile isHexDigit <$>
-            readProcess gitBinary [ "-C", fpath, "rev-parse", "master" ]
+            readProcess gitBinary [ "-C", fpath, "rev-parse", branch ]
   if length hash == 40
     then pure $ GitHash (Text.pack hash)
     else error $ "getGitHash: Failed for " ++ fpath

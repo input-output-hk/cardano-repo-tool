@@ -15,7 +15,7 @@ import           RepoTool.Types
 
 
 getAllNixShas :: RepoInfoMap -> IO RepoInfoMap
-getAllNixShas rmap = do
+getAllNixShas rmap =
     Map.fromList <$> mapM update (Map.toList rmap)
   where
     update :: (RepoName, RepoInfo) -> IO (RepoName, RepoInfo)
