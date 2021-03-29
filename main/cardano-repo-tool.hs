@@ -219,4 +219,5 @@ repos =
     , "cardano-wallet"
     , "iohk-monitoring-framework"
     , "ouroboros-network"
+    , "Win32-network"
     ]
