@@ -217,7 +217,9 @@ repos =
     , "cardano-sl-x509"
     , "cardano-transactions"
     , "cardano-wallet"
+    , "hedgehog-extras"
     , "iohk-monitoring-framework"
     , "ouroboros-network"
     , "Win32-network"
     ]
+
