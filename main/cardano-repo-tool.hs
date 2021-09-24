@@ -217,9 +217,11 @@ repos =
     , "cardano-sl-x509"
     , "cardano-transactions"
     , "cardano-wallet"
+    , "flat"
     , "hedgehog-extras"
     , "iohk-monitoring-framework"
     , "ouroboros-network"
+    , "plutus"
     , "Win32-network"
     ]
 
