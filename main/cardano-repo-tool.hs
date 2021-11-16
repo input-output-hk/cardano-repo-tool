@@ -209,7 +209,7 @@ repos =
     -- , "cardano-benchmarking"
     , "cardano-db-sync"
     , "cardano-crypto"
-    , "cardano-ledger-specs"
+    , "cardano-ledger"
     , "cardano-node"
     , "cardano-prelude"
     , "cardano-rest"
