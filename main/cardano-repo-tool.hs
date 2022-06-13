@@ -201,8 +201,7 @@ validateRepos = do
 repos :: [RepoDirectory]
 repos =
   map RepoDirectory
-    [ "goblins"
-    , "cardano-addresses"
+    [ "cardano-addresses"
     , "cardano-base"
     -- Benchmarking uses git subnodules and CRT does not work with submodules and
     -- I do not have time to figure out why.
@@ -218,10 +217,13 @@ repos =
     , "cardano-transactions"
     , "cardano-wallet"
     , "flat"
+    , "goblins"
     , "hedgehog-extras"
     , "iohk-monitoring-framework"
+    , "io-sim"
     , "ouroboros-network"
     , "plutus"
+    , "typed-protocols"
     , "Win32-network"
     ]
 
