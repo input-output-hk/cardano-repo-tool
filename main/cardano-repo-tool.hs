@@ -226,8 +226,8 @@ repos =
     , "lmdb-simple"
     , "ouroboros-network"
     , "plutus"
+    , "plutus-apps"
     , "typed-protocols"
-    , "plitus-apps"
     , "Win32-network"
     ]
 
