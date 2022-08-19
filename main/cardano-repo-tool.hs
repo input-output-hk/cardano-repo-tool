@@ -186,7 +186,7 @@ validateRepos = do
       progName <- getProgName
       mapM_ putStrLn $
         [ "Error:"
-        , "  Git repository " ++ fpath ++ " does not exit in the current directory."
+        , "  Git repository " ++ fpath ++ " does not exiist in the current directory."
         , "  It should be possible to clone it using the command:"
         , "    git clone https://github.com/input-output-hk/"
         , "  Alternatively, you could just run:"
