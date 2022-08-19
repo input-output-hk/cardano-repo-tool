@@ -203,6 +203,7 @@ repos =
   map RepoDirectory
     [ "cardano-addresses"
     , "cardano-base"
+    , "cardano-crypto"
     -- Benchmarking uses git subnodules and CRT does not work with submodules and
     -- I do not have time to figure out why.
     -- , "cardano-benchmarking"
@@ -226,6 +227,7 @@ repos =
     , "ouroboros-network"
     , "plutus"
     , "typed-protocols"
+    , "plitus-apps"
     , "Win32-network"
     ]
 
